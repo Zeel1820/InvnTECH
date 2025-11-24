@@ -1,0 +1,139 @@
+Critical gaps to add (must-have)
+
+Inventory ledger (immutable): every in/out/adjust action writes a row (who/when/why). All stock levels should be derived from this ledger, not stored as a single mutable number.
+
+Warehouses/locations: support multi-site stock and role scoping (manager can manage only assigned locations).
+
+Batches & expiry (non-serialized): batch/lot number, manufacture/expiry, supplier—needed for recalls & FIFO/LIFO.
+
+Item lifecycle (serialized): states like in_stock, issued, under_repair, retired, lost. Add reason codes.
+
+Stock transfer flow: move between warehouses as two ledger rows (OUT from A, IN to B) with a single transfer reference.
+
+Adjustments with reason & approval: negative/positive adjustments require a reason; optionally manager approval.
+
+Soft deletes + audit trail: deleted_at, updated_by, updated_at everywhere; keep history tables or triggers.
+
+Role/permission matrix (RBAC): explicit policy for: create/read/update/delete for Items, Serials, Batches, Ledger, Users, Reports, Transfers.
+
+Concurrency control: use transactions + optimistic locking (e.g., version column) when updating quantities.
+
+Input & bulk ops: CSV import/export for items, serials, batches; bulk print QR labels.
+
+Search & pagination: server-side filters + indexed columns (name, sku, serial, batch, status).
+
+Reports you’ll actually need:
+
+Current stock (by item, warehouse)
+
+Stock ledger (date range, item/warehouse filters)
+
+Low stock vs reorder level
+
+Aging/expiry (non-serialized)
+
+Utilization & status breakdown (serialized)
+
+Adjustment & transfer audit
+
+QR security: encode a signed token (e.g., JWT) not just an ID; verify signature when scanning to prevent tampering.
+
+Printable labels: templates (A4/Letter), label size presets (e.g., 38×38 mm, 50×25 mm), logo, SKU/Serial/Batch, short URL.
+
+Data model additions (SQL)
+
+warehouses(id, name, timezone, …)
+
+items(id, sku, name, type(serialized|non_serialized), uom, reorder_level, …)
+
+item_images(item_id, url, primary)
+
+serials(id, item_id, serial_no, status, warranty_end, assigned_to?, …)
+
+batches(id, item_id, batch_code, mfg_date, exp_date, supplier, qty_on_hand (derived view))
+
+ledger(id, item_id, warehouse_id, kind(in|out|adjust|transfer), qty, serial_id?, batch_id?, reason_code, ref_no, created_by, created_at)
+
+transfers(id, from_warehouse_id, to_warehouse_id, ref_no, created_by, created_at)
+
+manager_warehouses(manager_id, warehouse_id) (scope managers)
+
+qr_tokens(id, entity_type, entity_id, token, expires_at, created_at)
+
+Views: v_current_stock, v_low_stock, v_batch_balances, v_serial_status.
+
+Indexes: (sku), (serial_no), (item_id, warehouse_id), (batch_code), (created_at), plus partial indexes on active items.
+
+API/Backend behaviors
+
+Transactions for: receive stock, issue stock, transfer stock, batch split/merge.
+
+Idempotency keys on write endpoints to avoid double submissions.
+
+Background jobs: low-stock alerts, soon-to-expire batches, QR token rotation, nightly materialized-view refresh (if you add them).
+
+File storage for images/labels (S3/Cloudinary); Replit storage is ephemeral.
+
+Auth & security
+
+MFA + password reset (Firebase Auth works well even if code runs on Replit).
+
+Row-level authorization in queries (scope by warehouse for managers; staff read-only).
+
+Rate limiting (reverse proxy or middleware).
+
+Audit logging: user logins, permission changes, report downloads.
+
+Mobile/PWA & QR scanning
+
+PWA installability + service worker so it behaves like an app on phones.
+
+WebRTC camera scan with graceful fallbacks (file upload, manual entry).
+
+Accessibility: large tap targets, high-contrast labels, on-device flashlight toggle while scanning.
+
+UX details to nail
+
+Wizard when adding items:
+
+Serialized: generate X serials + QR per serial.
+
+Non-serialized: create batch, initial quantity, QR for batch.
+
+Detail pages:
+
+Serialized item → history timeline (ledger rows), status changes, attachments.
+
+Batch → quantity remaining (derived), expiry warnings, splits.
+
+Global search bar (SKU/Serial/Batch/Name).
+
+Empty states & undo toasts (for accidental actions).
+
+Role-aware navigation mirroring your diagram (Admin/Manager/Staff dashboards).
+
+DevOps on Replit
+
+Use an external managed SQL (Neon/Supabase Postgres or PlanetScale/MySQL).
+
+Migrations (Prisma/Knex/Flyway) stored in git.
+
+Secrets in Replit Secrets.
+
+Monitoring: Sentry (front+back) and SQL slow-query logging.
+
+Backups scheduled on the DB provider.
+
+Quick “next steps” checklist
+
+Add warehouses, ledger, serials, batches, transfers to schema.
+
+Define RBAC matrix and enforce in API.
+
+Implement QR signing & verify on scan.
+
+Build reports (SQL views) + CSV/PDF export.
+
+Add bulk import & label printing.
+
+Wire notifications (email/Slack/WhatsApp) for low stock/expiry/adjustments (optional, but useful).
