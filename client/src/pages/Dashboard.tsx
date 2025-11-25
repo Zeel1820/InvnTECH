@@ -1,17 +1,17 @@
-import TopBar from "@/components/TopBar";
-import BottomNav from "@/components/BottomNav";
-import StatsCard from "@/components/StatsCard";
-import InventoryListItem from "@/components/InventoryListItem";
-import FloatingActionButton from "@/components/FloatingActionButton";
-import RoleBadge from "@/components/RoleBadge";
-import ThemeToggle from "@/components/ThemeToggle";
-import { Package, AlertTriangle, TrendingUp, Warehouse, Plus } from "lucide-react";
-import { useState } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
-import type { Item, Warehouse as WarehouseType, Ledger } from "@shared/schema";
+import TopBar from '@/components/TopBar';
+import BottomNav from '@/components/BottomNav';
+import StatsCard from '@/components/StatsCard';
+import InventoryListItem from '@/components/InventoryListItem';
+import FloatingActionButton from '@/components/FloatingActionButton';
+import RoleBadge from '@/components/RoleBadge';
+import ThemeToggle from '@/components/ThemeToggle';
+import { Package, AlertTriangle, TrendingUp, Warehouse, Plus } from 'lucide-react';
+import { useState } from 'react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
+import type { Item, Warehouse as WarehouseType, Ledger } from '@shared/schema';
 
 export default function Dashboard() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -30,24 +30,25 @@ export default function Dashboard() {
     enabled: !!user,
   });
 
-  const recentItems = ledgerEntries
-    ?.slice(0, 3)
-    .map(entry => {
-      const item = items?.find(i => i.id === entry.itemId);
-      const warehouse = warehouses?.find(w => w.id === entry.warehouseId);
-      if (!item) return null;
-      
-      return {
-        id: item.id,
-        name: item.name,
-        sku: item.sku,
-        type: item.type,
-        status: 'in_stock' as const,
-        warehouse: warehouse?.name || 'Unknown',
-        quantity: entry.quantity,
-      };
-    })
-    .filter(Boolean) as any[] || [];
+  const recentItems =
+    (ledgerEntries
+      ?.slice(0, 3)
+      .map((entry) => {
+        const item = items?.find((i) => i.id === entry.itemId);
+        const warehouse = warehouses?.find((w) => w.id === entry.warehouseId);
+        if (!item) return null;
+
+        return {
+          id: item.id,
+          name: item.name,
+          sku: item.sku,
+          type: item.type,
+          status: 'in_stock' as const,
+          warehouse: warehouse?.name || 'Unknown',
+          quantity: entry.quantity,
+        };
+      })
+      .filter(Boolean) as any[]) || [];
 
   return (
     <div className="min-h-screen bg-background pb-16">
@@ -56,7 +57,7 @@ export default function Dashboard() {
         showSearch
         showNotifications
         onMenuClick={() => setMenuOpen(!menuOpen)}
-        onSearchClick={() => console.log("Search clicked")}
+        onSearchClick={() => console.log('Search clicked')}
       />
 
       <main className="px-4 pt-4 space-y-6">
@@ -83,7 +84,7 @@ export default function Dashboard() {
             value={itemsLoading ? '...' : (items?.length || 0).toString()}
             subtitle={user?.role === 'manager' ? 'In system' : 'Active inventory'}
             icon={Package}
-            onClick={() => console.log("Navigate to inventory")}
+            onClick={() => console.log('Navigate to inventory')}
             data-testid="card-total-items"
           />
           <StatsCard
@@ -102,14 +103,20 @@ export default function Dashboard() {
           />
           <StatsCard
             title="This Month"
-            value={ledgerLoading ? '...' : 
-              (ledgerEntries?.filter(e => {
-                const entryDate = new Date(e.createdAt);
-                const now = new Date();
-                return entryDate.getMonth() === now.getMonth() && 
-                       entryDate.getFullYear() === now.getFullYear() &&
-                       e.action === 'in';
-              }).length || 0).toString()
+            value={
+              ledgerLoading
+                ? '...'
+                : (
+                    ledgerEntries?.filter((e) => {
+                      const entryDate = new Date(e.createdAt);
+                      const now = new Date();
+                      return (
+                        entryDate.getMonth() === now.getMonth() &&
+                        entryDate.getFullYear() === now.getFullYear() &&
+                        e.action === 'in'
+                      );
+                    }).length || 0
+                  ).toString()
             }
             subtitle="Items received"
             icon={AlertTriangle}
@@ -123,7 +130,7 @@ export default function Dashboard() {
             <h2 className="text-base font-medium">Recent Activity</h2>
             <button
               className="text-sm text-primary hover-elevate px-2 py-1 rounded"
-              onClick={() => console.log("View all")}
+              onClick={() => console.log('View all')}
               data-testid="button-view-all"
             >
               View All
@@ -141,7 +148,7 @@ export default function Dashboard() {
                 <InventoryListItem
                   key={item.id}
                   {...item}
-                  onClick={() => console.log("Item clicked:", item.id)}
+                  onClick={() => console.log('Item clicked:', item.id)}
                 />
               ))
             ) : (
@@ -158,7 +165,7 @@ export default function Dashboard() {
       <FloatingActionButton
         icon={Plus}
         label="Add Item"
-        onClick={() => console.log("Add item clicked")}
+        onClick={() => console.log('Add item clicked')}
       />
 
       <BottomNav />

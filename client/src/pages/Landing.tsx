@@ -1,34 +1,34 @@
 // Reference: blueprint:javascript_log_in_with_replit
-import { Button } from "@/components/ui/button";
-import { Package, QrCode, BarChart3, Warehouse } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { Package, QrCode, BarChart3, Warehouse } from 'lucide-react';
 
 export default function Landing() {
   const handleLogin = () => {
-    window.location.href = "/api/login";
+    window.location.href = '/login';
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background">
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            InvenTECH
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">InvenTECH</h1>
           <p className="text-xl text-muted-foreground mb-8">
             Enterprise Inventory Management System
           </p>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-            Track serialized and non-serialized inventory across multiple warehouses 
-            with QR code scanning, immutable audit trails, and comprehensive reporting.
+            Track serialized and non-serialized inventory across multiple warehouses with QR code
+            scanning, immutable audit trails, and comprehensive reporting.
           </p>
-          <Button 
-            size="lg" 
+          <Button
+            size="lg"
             className="h-12 px-8 text-lg"
             onClick={handleLogin}
             data-testid="button-login"
           >
             Sign In to Continue
           </Button>
+
+          <Button onClick={() => (window.location.href = '/signup')}>Create Account</Button>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
