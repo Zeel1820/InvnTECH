@@ -2,6 +2,7 @@
 
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import { queryClient } from '@/lib/queryClient'; // ⭐ ADD THIS
 
 export default function Login() {
   const { toast } = useToast();
@@ -11,13 +12,11 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
 
-  // Email validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    // Clear UI errors
     if (!emailRegex.test(email)) {
       toast({
         variant: 'destructive',
@@ -44,21 +43,24 @@ export default function Login() {
       return;
     }
 
-    // Success toast
+    // Success
     toast({
       title: 'Login Successful',
-      description: 'Redirecting to dashboard...',
+      description: 'Redirecting...',
     });
 
     if (remember) {
-      localStorage.setItem('token', data.token);
+      localStorage.setItem('token', data.token); // ⭐ STORE TOKEN
     }
 
+    // ⭐ REFRESH AUTH USER
+    queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+
+    // ⭐ Redirect
     setTimeout(() => {
       window.location.href = '/dashboard';
-    }, 1200);
+    }, 800);
   };
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center w-full dark:bg-gray-950 bg-background px-3">
       <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg px-8 py-6 max-w-md w-full">
