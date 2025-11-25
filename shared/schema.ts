@@ -45,17 +45,55 @@ export const sessions = mysqlTable(
 /* ─────────────────────────────────────────────
    USERS
 ─────────────────────────────────────────────── */
+// export const users = mysqlTable("users", {
+//   id: varchar("id", { length: 255 }).primaryKey().default(sql`(uuid())`),
+//   email: varchar("email", { length: 255 }).unique(),
+//   firstName: varchar("first_name", { length: 255 }),
+//   lastName: varchar("last_name", { length: 255 }),
+//   profileImageUrl: varchar("profile_image_url", { length: 255 }),
+//   role: userRoleEnum.notNull().default("staff"),
+//   isActive: boolean("is_active").notNull().default(true),
+//   createdAt: timestamp("created_at").default(sql`(now())`).notNull(),
+//   updatedAt: timestamp("updated_at").default(sql`(now())`).onUpdateNow().notNull(),
+// });
 export const users = mysqlTable("users", {
-  id: varchar("id", { length: 255 }).primaryKey().default(sql`(uuid())`),
-  email: varchar("email", { length: 255 }).unique(),
-  firstName: varchar("first_name", { length: 255 }),
-  lastName: varchar("last_name", { length: 255 }),
+  id: varchar("id", { length: 255 })
+    .primaryKey()
+    .default(sql`(uuid())`),
+
+  email: varchar("email", { length: 255 })
+    .notNull()
+    .unique(),
+
+  password: varchar("password", { length: 255 })
+    .notNull(),
+
+  firstName: varchar("first_name", { length: 255 })
+    .default(""),
+
+  lastName: varchar("last_name", { length: 255 })
+    .default(""),
+
   profileImageUrl: varchar("profile_image_url", { length: 255 }),
-  role: userRoleEnum.notNull().default("staff"),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at").default(sql`(now())`).notNull(),
-  updatedAt: timestamp("updated_at").default(sql`(now())`).onUpdateNow().notNull(),
+
+  role: mysqlEnum("user_role", ["admin", "manager", "staff"])
+    .notNull()
+    .default("staff"),
+
+  isActive: boolean("is_active")
+    .notNull()
+    .default(true),
+
+  createdAt: timestamp("created_at")
+    .notNull()
+    .default(sql`NOW()`),
+
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .default(sql`NOW()`)
+    .onUpdateNow(),
 });
+
 
 export const upsertUserSchema = createInsertSchema(users).pick({
   id: true,
