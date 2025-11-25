@@ -1,4 +1,3 @@
-// Reference: blueprint:javascript_log_in_with_replit
 import {
   users,
   warehouses,
@@ -9,207 +8,213 @@ import {
   transfers,
   managerWarehouses,
   type User,
-  type UpsertUser,
-  type Warehouse,
   type InsertWarehouse,
-  type Item,
+  type Warehouse,
   type InsertItem,
-  type Serial,
+  type Item,
   type InsertSerial,
-  type Batch,
+  type Serial,
   type InsertBatch,
-  type Ledger,
+  type Batch,
   type InsertLedger,
-  type Transfer,
+  type Ledger,
   type InsertTransfer,
-  type ManagerWarehouse,
+  type Transfer,
   type InsertManagerWarehouse,
+  type ManagerWarehouse,
 } from "@shared/schema";
+
 import { db } from "./db";
-import { eq, and, or, desc, asc, sql, inArray } from "drizzle-orm";
+import { eq, and, or, desc, sql } from "drizzle-orm";
+import bcrypt from "bcryptjs";
+import { randomUUID } from "crypto";
 
-export interface IStorage {
-  // User operations (mandatory for Replit Auth)
-  getUser(id: string): Promise<User | undefined>;
-  getUsers(): Promise<User[]>;
-  upsertUser(user: UpsertUser): Promise<User>;
-  
-  // Warehouse operations
-  getWarehouses(): Promise<Warehouse[]>;
-  getWarehouse(id: string): Promise<Warehouse | undefined>;
-  createWarehouse(warehouse: InsertWarehouse): Promise<Warehouse>;
-  updateWarehouse(id: string, warehouse: Partial<InsertWarehouse>): Promise<Warehouse | undefined>;
-  getManagerWarehouses(managerId: string): Promise<string[]>;
-  assignManagerToWarehouse(data: InsertManagerWarehouse): Promise<ManagerWarehouse>;
-  removeManagerFromWarehouse(managerId: string, warehouseId: string): Promise<void>;
-  
-  // Item operations
-  getItems(): Promise<Item[]>;
-  getItem(id: string): Promise<Item | undefined>;
-  getItemBySku(sku: string): Promise<Item | undefined>;
-  createItem(item: InsertItem): Promise<Item>;
-  updateItem(id: string, item: Partial<InsertItem>): Promise<Item | undefined>;
-  deleteItem(id: string): Promise<void>;
-  
-  // Serial operations
-  getSerials(itemId?: string): Promise<Serial[]>;
-  getSerial(id: string): Promise<Serial | undefined>;
-  getSerialByNumber(serialNumber: string): Promise<Serial | undefined>;
-  createSerial(serial: InsertSerial): Promise<Serial>;
-  updateSerial(id: string, serial: Partial<InsertSerial>): Promise<Serial | undefined>;
-  
-  // Batch operations
-  getBatches(itemId?: string): Promise<Batch[]>;
-  getBatch(id: string): Promise<Batch | undefined>;
-  createBatch(batch: InsertBatch): Promise<Batch>;
-  updateBatch(id: string, batch: Partial<InsertBatch>): Promise<Batch | undefined>;
-  
-  // Ledger operations
-  createLedgerEntry(entry: InsertLedger): Promise<Ledger>;
-  getLedgerEntries(filters?: { itemId?: string; warehouseId?: string; limit?: number }): Promise<Ledger[]>;
-  
-  // Transfer operations
-  getTransfers(filters?: { status?: string; warehouseId?: string }): Promise<Transfer[]>;
-  getTransfer(id: string): Promise<Transfer | undefined>;
-  createTransfer(transfer: InsertTransfer): Promise<Transfer>;
-  updateTransfer(id: string, transfer: Partial<InsertTransfer>): Promise<Transfer | undefined>;
-}
+export class DatabaseStorage {
+  /* ---------------------------------------- */
+  /* USERS – for JWT Login                    */
+  /* ---------------------------------------- */
 
-export class DatabaseStorage implements IStorage {
-  // User operations (mandatory for Replit Auth)
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(sql`LOWER(${users.email}) = LOWER(${email})`);
+    return user;
+  }
+
+  async createUser(data: {
+    email: string;
+    password: string;
+    firstName?: string;
+    lastName?: string;
+    role: string;
+  }): Promise<User> {
+    const hashed = await bcrypt.hash(data.password, 10);
+    const id = randomUUID();
+
+    try {
+      await db.insert(users).values({
+        id,
+        email: data.email,
+        password: hashed,
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
+        role: data.role,
+      });
+
+      const [created] = await db.select().from(users).where(eq(users.id, id));
+      if (!created) {
+        throw new Error("Failed to fetch created user");
+      }
+      return created;
+    } catch (err: any) {
+      if (err?.errno === 1062) {
+        // Duplicate entry
+        throw new Error("Email already exists");
+      }
+      throw err;
+    }
+  }
+
+  async validatePassword(raw: string, hash: string) {
+    return bcrypt.compare(raw, hash);
   }
 
   async getUsers(): Promise<User[]> {
     return await db.select().from(users);
   }
 
-  async upsertUser(userData: UpsertUser): Promise<User> {
-    try {
-      // Try to upsert based on ID (normal case)
-      const [user] = await db
-        .insert(users)
-        .values(userData)
-        .onConflictDoUpdate({
-          target: users.id,
-          set: {
-            ...userData,
-            updatedAt: new Date(),
-          },
-        })
-        .returning();
-      return user;
-    } catch (error: any) {
-      // Handle unique constraint violation on email
-      if (error?.code === '23505' && error?.constraint === 'users_email_unique') {
-        // Find user by email and delete them (CASCADE handles related records)
-        await db.delete(users).where(eq(users.email, userData.email));
-        
-        // Now insert the new user
-        const [user] = await db
-          .insert(users)
-          .values(userData)
-          .returning();
-        return user;
-      }
-      throw error;
-    }
-  }
+  /* ---------------------------------------- */
+  /* WAREHOUSES                               */
+  /* ---------------------------------------- */
 
-  // Warehouse operations
   async getWarehouses(): Promise<Warehouse[]> {
-    return await db.select().from(warehouses).where(eq(warehouses.isActive, true));
+    return await db
+      .select()
+      .from(warehouses)
+      .where(eq(warehouses.isActive, true));
   }
 
   async getWarehouse(id: string): Promise<Warehouse | undefined> {
-    const [warehouse] = await db.select().from(warehouses).where(eq(warehouses.id, id));
-    return warehouse;
+    const [wh] = await db.select().from(warehouses).where(eq(warehouses.id, id));
+    return wh;
   }
 
-  async createWarehouse(warehouse: InsertWarehouse): Promise<Warehouse> {
-    const [created] = await db.insert(warehouses).values(warehouse).returning();
+  async createWarehouse(data: InsertWarehouse): Promise<Warehouse> {
+    const id = randomUUID();
+    await db.insert(warehouses).values({ id, ...data });
+
+    const [created] = await db.select().from(warehouses).where(eq(warehouses.id, id));
+    if (!created) throw new Error("Failed to fetch created warehouse");
     return created;
   }
 
-  async updateWarehouse(id: string, warehouseData: Partial<InsertWarehouse>): Promise<Warehouse | undefined> {
-    const [updated] = await db
+  async updateWarehouse(
+    id: string,
+    data: Partial<InsertWarehouse>
+  ): Promise<Warehouse | undefined> {
+    await db
       .update(warehouses)
-      .set({ ...warehouseData, updatedAt: new Date() })
-      .where(eq(warehouses.id, id))
-      .returning();
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(warehouses.id, id));
+
+    const [updated] = await db.select().from(warehouses).where(eq(warehouses.id, id));
     return updated;
   }
 
   async getManagerWarehouses(managerId: string): Promise<string[]> {
-    const assignments = await db
+    const rows = await db
       .select({ warehouseId: managerWarehouses.warehouseId })
       .from(managerWarehouses)
       .where(eq(managerWarehouses.managerId, managerId));
-    return assignments.map(a => a.warehouseId);
+
+    return rows.map((x) => x.warehouseId);
   }
 
-  async assignManagerToWarehouse(data: InsertManagerWarehouse): Promise<ManagerWarehouse> {
-    const [assignment] = await db.insert(managerWarehouses).values(data).returning();
-    return assignment;
+  async assignManagerToWarehouse(
+    data: InsertManagerWarehouse
+  ): Promise<ManagerWarehouse> {
+    const id = randomUUID();
+    await db.insert(managerWarehouses).values({ id, ...data });
+
+    const [created] = await db
+      .select()
+      .from(managerWarehouses)
+      .where(eq(managerWarehouses.id, id));
+
+    if (!created) throw new Error("Failed to fetch created managerWarehouse");
+    return created;
   }
 
-  async removeManagerFromWarehouse(managerId: string, warehouseId: string): Promise<void> {
-    await db
-      .delete(managerWarehouses)
-      .where(
-        and(
-          eq(managerWarehouses.managerId, managerId),
-          eq(managerWarehouses.warehouseId, warehouseId)
-        )
-      );
-  }
+  /* ---------------------------------------- */
+  /* ITEMS                                    */
+  /* ---------------------------------------- */
 
-  // Item operations
   async getItems(): Promise<Item[]> {
-    return await db.select().from(items).where(eq(items.isActive, true)).orderBy(desc(items.createdAt));
+    return await db
+      .select()
+      .from(items)
+      .where(eq(items.isActive, true))
+      .orderBy(desc(items.createdAt));
   }
 
   async getItem(id: string): Promise<Item | undefined> {
-    const [item] = await db.select().from(items).where(and(eq(items.id, id), eq(items.isActive, true)));
+    const [item] = await db.select().from(items).where(eq(items.id, id));
     return item;
   }
 
   async getItemBySku(sku: string): Promise<Item | undefined> {
-    // Try exact match first (case-insensitive)
-    const [exactMatch] = await db.select().from(items).where(sql`LOWER(${items.sku}) = LOWER(${sku})`);
-    if (exactMatch) {
-      return exactMatch;
-    }
-    
-    // Try partial match (case-insensitive)
-    const [partialMatch] = await db.select().from(items).where(sql`LOWER(${items.sku}) LIKE LOWER(${sku} || '%')`);
-    return partialMatch;
+    const [item] = await db
+      .select()
+      .from(items)
+      .where(sql`LOWER(${items.sku}) = LOWER(${sku})`);
+    return item;
   }
 
-  async createItem(item: InsertItem): Promise<Item> {
-    const [created] = await db.insert(items).values(item).returning();
+  async createItem(data: InsertItem): Promise<Item> {
+    const id = randomUUID();
+    await db.insert(items).values({ id, ...data });
+
+    const [created] = await db.select().from(items).where(eq(items.id, id));
+    if (!created) throw new Error("Failed to fetch created item");
     return created;
   }
 
-  async updateItem(id: string, itemData: Partial<InsertItem>): Promise<Item | undefined> {
-    const [updated] = await db
+  async updateItem(
+    id: string,
+    data: Partial<InsertItem>
+  ): Promise<Item | undefined> {
+    await db
       .update(items)
-      .set({ ...itemData, updatedAt: new Date() })
-      .where(eq(items.id, id))
-      .returning();
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(items.id, id));
+
+    const [updated] = await db.select().from(items).where(eq(items.id, id));
     return updated;
   }
 
   async deleteItem(id: string): Promise<void> {
-    await db.update(items).set({ isActive: false, updatedAt: new Date() }).where(eq(items.id, id));
+    await db
+      .update(items)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(items.id, id));
   }
 
-  // Serial operations
+  /* ---------------------------------------- */
+  /* SERIALS                                  */
+  /* ---------------------------------------- */
+
   async getSerials(itemId?: string): Promise<Serial[]> {
     if (itemId) {
-      return await db.select().from(serials).where(eq(serials.itemId, itemId));
+      return await db
+        .select()
+        .from(serials)
+        .where(eq(serials.itemId, itemId));
     }
     return await db.select().from(serials);
   }
@@ -219,29 +224,46 @@ export class DatabaseStorage implements IStorage {
     return serial;
   }
 
-  async getSerialByNumber(serialNumber: string): Promise<Serial | undefined> {
-    const [serial] = await db.select().from(serials).where(sql`LOWER(${serials.serialNumber}) = LOWER(${serialNumber})`);
+  async getSerialByNumber(code: string): Promise<Serial | undefined> {
+    const [serial] = await db
+      .select()
+      .from(serials)
+      .where(sql`LOWER(${serials.serialNumber}) = LOWER(${code})`);
     return serial;
   }
 
-  async createSerial(serial: InsertSerial): Promise<Serial> {
-    const [created] = await db.insert(serials).values(serial).returning();
+  async createSerial(data: InsertSerial): Promise<Serial> {
+    const id = randomUUID();
+    await db.insert(serials).values({ id, ...data });
+
+    const [created] = await db.select().from(serials).where(eq(serials.id, id));
+    if (!created) throw new Error("Failed to fetch created serial");
     return created;
   }
 
-  async updateSerial(id: string, serialData: Partial<InsertSerial>): Promise<Serial | undefined> {
-    const [updated] = await db
+  async updateSerial(
+    id: string,
+    data: Partial<InsertSerial>
+  ): Promise<Serial | undefined> {
+    await db
       .update(serials)
-      .set({ ...serialData, updatedAt: new Date() })
-      .where(eq(serials.id, id))
-      .returning();
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(serials.id, id));
+
+    const [updated] = await db.select().from(serials).where(eq(serials.id, id));
     return updated;
   }
 
-  // Batch operations
+  /* ---------------------------------------- */
+  /* BATCHES                                  */
+  /* ---------------------------------------- */
+
   async getBatches(itemId?: string): Promise<Batch[]> {
     if (itemId) {
-      return await db.select().from(batches).where(eq(batches.itemId, itemId));
+      return await db
+        .select()
+        .from(batches)
+        .where(eq(batches.itemId, itemId));
     }
     return await db.select().from(batches);
   }
@@ -251,90 +273,127 @@ export class DatabaseStorage implements IStorage {
     return batch;
   }
 
-  async createBatch(batch: InsertBatch): Promise<Batch> {
-    const [created] = await db.insert(batches).values(batch).returning();
+  async createBatch(data: InsertBatch): Promise<Batch> {
+    const id = randomUUID();
+    await db.insert(batches).values({ id, ...data });
+
+    const [created] = await db.select().from(batches).where(eq(batches.id, id));
+    if (!created) throw new Error("Failed to fetch created batch");
     return created;
   }
 
-  async updateBatch(id: string, batchData: Partial<InsertBatch>): Promise<Batch | undefined> {
-    const [updated] = await db
+  async updateBatch(
+    id: string,
+    data: Partial<InsertBatch>
+  ): Promise<Batch | undefined> {
+    await db
       .update(batches)
-      .set({ ...batchData, updatedAt: new Date() })
-      .where(eq(batches.id, id))
-      .returning();
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(batches.id, id));
+
+    const [updated] = await db.select().from(batches).where(eq(batches.id, id));
     return updated;
   }
 
-  // Ledger operations
-  async createLedgerEntry(entry: InsertLedger): Promise<Ledger> {
-    const [created] = await db.insert(ledger).values(entry).returning();
+  /* ---------------------------------------- */
+  /* LEDGER                                   */
+  /* ---------------------------------------- */
+
+  async createLedgerEntry(data: InsertLedger): Promise<Ledger> {
+    const id = randomUUID();
+    await db.insert(ledger).values({ id, ...data });
+
+    const [created] = await db.select().from(ledger).where(eq(ledger.id, id));
+    if (!created) throw new Error("Failed to fetch created ledger entry");
     return created;
   }
 
-  async getLedgerEntries(filters?: { itemId?: string; warehouseId?: string; limit?: number }): Promise<Ledger[]> {
-    let query = db.select().from(ledger);
-    
-    const conditions = [];
-    if (filters?.itemId) {
-      conditions.push(eq(ledger.itemId, filters.itemId));
-    }
-    if (filters?.warehouseId) {
-      conditions.push(eq(ledger.warehouseId, filters.warehouseId));
-    }
-    
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions)) as any;
-    }
-    
-    query = query.orderBy(desc(ledger.createdAt)) as any;
-    
-    if (filters?.limit) {
-      query = query.limit(filters.limit) as any;
-    }
-    
-    return await query;
+ async getLedgerEntries(filters: { itemId?: string; warehouseId?: string; limit?: number } = {}) {
+  let whereClause: any[] = [];
+
+  if (filters.itemId) {
+    whereClause.push(eq(ledger.itemId, filters.itemId));
+  }
+  if (filters.warehouseId) {
+    whereClause.push(eq(ledger.warehouseId, filters.warehouseId));
   }
 
-  // Transfer operations
-  async getTransfers(filters?: { status?: string; warehouseId?: string }): Promise<Transfer[]> {
-    let query = db.select().from(transfers);
-    
-    const conditions = [];
-    if (filters?.status) {
-      conditions.push(eq(transfers.status, filters.status as any));
-    }
-    if (filters?.warehouseId) {
-      conditions.push(
-        or(
-          eq(transfers.fromWarehouseId, filters.warehouseId),
-          eq(transfers.toWarehouseId, filters.warehouseId)
-        )
-      );
-    }
-    
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions)) as any;
-    }
-    
-    return await query.orderBy(desc(transfers.createdAt));
+  const finalQuery = db
+    .select()
+    .from(ledger)
+    .where(whereClause.length ? and(...whereClause) : undefined)
+    .orderBy(desc(ledger.createdAt))
+    .limit(filters.limit ?? undefined);
+
+  return await finalQuery;
+}
+
+
+  /* ---------------------------------------- */
+  /* TRANSFERS                                */
+  /* ---------------------------------------- */
+
+  async getTransfers(filters: { status?: string; warehouseId?: string } = {}) {
+  let whereClause: any[] = [];
+
+  if (filters.status) {
+    whereClause.push(eq(transfers.status, filters.status as any));
   }
+
+  if (filters.warehouseId) {
+    whereClause.push(
+      or(
+        eq(transfers.fromWarehouseId, filters.warehouseId),
+        eq(transfers.toWarehouseId, filters.warehouseId)
+      )
+    );
+  }
+
+  const finalQuery = db
+    .select()
+    .from(transfers)
+    .where(whereClause.length ? and(...whereClause) : undefined)
+    .orderBy(desc(transfers.createdAt));
+
+  return await finalQuery;
+}
+
 
   async getTransfer(id: string): Promise<Transfer | undefined> {
-    const [transfer] = await db.select().from(transfers).where(eq(transfers.id, id));
+    const [transfer] = await db
+      .select()
+      .from(transfers)
+      .where(eq(transfers.id, id));
     return transfer;
   }
 
-  async createTransfer(transfer: InsertTransfer): Promise<Transfer> {
-    const [created] = await db.insert(transfers).values(transfer).returning();
+  async createTransfer(data: InsertTransfer): Promise<Transfer> {
+    const id = randomUUID();
+    await db.insert(transfers).values({ id, ...data });
+
+    const [created] = await db
+      .select()
+      .from(transfers)
+      .where(eq(transfers.id, id));
+
+    if (!created) throw new Error("Failed to fetch created transfer");
     return created;
   }
 
-  async updateTransfer(id: string, transferData: Partial<InsertTransfer>): Promise<Transfer | undefined> {
-    const [updated] = await db
+  async updateTransfer(
+    id: string,
+    data: Partial<InsertTransfer>
+  ): Promise<Transfer | undefined> {
+    await db
       .update(transfers)
-      .set(transferData)
-      .where(eq(transfers.id, id))
-      .returning();
+      .set(data)
+      .where(eq(transfers.id, id));
+
+    const [updated] = await db
+      .select()
+      .from(transfers)
+      .where(eq(transfers.id, id));
+
     return updated;
   }
 }
