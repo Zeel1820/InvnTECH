@@ -1,15 +1,14 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
-import * as schema from "@shared/schema";
+import mysql from 'mysql2/promise';
+import { drizzle } from 'drizzle-orm/mysql2';
+import * as schema from '@shared/schema';
+import * as dotenv from 'dotenv';
 
-neonConfig.webSocketConstructor = ws;
-
+dotenv.config(); 
 if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+  throw new Error('DATABASE_URL must be set. Did you forget to provision a database?');
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle({ client: pool, schema });
+// Use a connection pool instead of a single connection for better performance in a server environment.
+export const pool = mysql.createPool(process.env.DATABASE_URL);
+
+export const db = drizzle(pool, { schema, mode: 'default' });

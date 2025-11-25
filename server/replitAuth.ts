@@ -6,10 +6,10 @@ import passport from "passport";
 import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
-import connectPg from "connect-pg-simple";
+import MySQLStore from 'express-mysql-session';
 import { storage } from "./storage";
 import { randomUUID } from "crypto";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { users } from "@shared/schema";
 import { sql } from "drizzle-orm";
 
@@ -25,13 +25,9 @@ const getOidcConfig = memoize(
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  const pgStore = connectPg(session);
-  const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
-    ttl: sessionTtl,
-    tableName: "sessions",
-  });
+  const MySQLStoreSession = MySQLStore(session as any);
+  const sessionStore = new MySQLStoreSession({}, pool);
+  
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
