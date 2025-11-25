@@ -1,20 +1,28 @@
 // Reference: blueprint:javascript_log_in_with_replit
-import { sql } from 'drizzle-orm';
+import { sql } from "drizzle-orm";
 import {
+  boolean,
+  decimal,
+  index,
+  int,
+  json,
+  mysqlEnum,
   mysqlTable,
-  varchar,
   text,
   timestamp,
-  int,
-  boolean,
-  mysqlEnum,
-  json,
-  index,
-  decimal,
   uniqueIndex,
+  varchar,
 } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+// Enums
+export const userRoleEnum = mysqlEnum("user_role", ["admin", "manager", "staff"]);
+export const consumptionTypeEnum = mysqlEnum("consumption_type", ["sellable", "loanable", "consumable"]);
+export const itemTypeEnum = mysqlEnum("item_type", ["serialized", "non-serialized"]);
+export const serialStatusEnum = mysqlEnum("serial_status", ["available", "issued", "under_repair", "retired"]);
+export const ledgerActionEnum = mysqlEnum("ledger_action", ["in", "out", "adjust", "transfer"]);
+export const transferStatusEnum = mysqlEnum("transfer_status", ["pending", "approved", "in_transit", "completed", "rejected"]);
 
 // Session storage table (mandatory for Replit Auth)
 export const sessions = mysqlTable(
@@ -28,12 +36,6 @@ export const sessions = mysqlTable(
     expireIdx: index("IDX_session_expire").on(table.expire),
   })
 );
-
-// User roles enum
-export const userRoleEnum = mysqlEnum("user_role", ["admin", "manager", "staff"]);
-
-// Item consumption type enum
-export const consumptionTypeEnum = mysqlEnum("consumption_type", ["sellable", "loanable", "consumable"]);
 
 // Users table (extended from Replit Auth blueprint)
 export const users = mysqlTable("users", {
@@ -100,9 +102,6 @@ export const insertManagerWarehouseSchema = createInsertSchema(managerWarehouses
 export type InsertManagerWarehouse = z.infer<typeof insertManagerWarehouseSchema>;
 export type ManagerWarehouse = typeof managerWarehouses.$inferSelect;
 
-// Item types enum
-export const itemTypeEnum = mysqlEnum("item_type", ["serialized", "non-serialized"]);
-
 // Items table
 export const items = mysqlTable("items", {
   id: varchar("id", { length: 255 }).primaryKey().default(sql`(uuid())`),
@@ -129,14 +128,6 @@ export const updateItemSchema = insertItemSchema.partial();
 export type InsertItem = z.infer<typeof insertItemSchema>;
 export type UpdateItem = z.infer<typeof updateItemSchema>;
 export type Item = typeof items.$inferSelect;
-
-// Serial status enum
-export const serialStatusEnum = mysqlEnum("serial_status", [
-  "available",
-  "issued",
-  "under_repair",
-  "retired",
-]);
 
 // Serialized items table
 export const serials = mysqlTable("serials", {
@@ -205,9 +196,6 @@ export type InsertBatch = z.infer<typeof insertBatchSchema>;
 export type UpdateBatch = z.infer<typeof updateBatchSchema>;
 export type Batch = typeof batches.$inferSelect;
 
-// Ledger action enum
-export const ledgerActionEnum = mysqlEnum("ledger_action", ["in", "out", "adjust", "transfer"]);
-
 // Stock ledger table (immutable audit log)
 export const ledger = mysqlTable("ledger", {
   id: varchar("id", { length: 255 }).primaryKey().default(sql`(uuid())`),
@@ -237,15 +225,6 @@ export const insertLedgerSchema = createInsertSchema(ledger).omit({
 
 export type InsertLedger = z.infer<typeof insertLedgerSchema>;
 export type Ledger = typeof ledger.$inferSelect;
-
-// Transfer status enum
-export const transferStatusEnum = mysqlEnum("transfer_status", [
-  "pending",
-  "approved",
-  "in_transit",
-  "completed",
-  "rejected",
-]);
 
 // Stock transfers table
 export const transfers = mysqlTable("transfers", {
