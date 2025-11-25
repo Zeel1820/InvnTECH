@@ -1,5 +1,7 @@
+
 import { Home, Package, QrCode, BarChart3 } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation } from "react-router-native";
+import { View, Pressable, Text } from 'react-native';
 
 interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
@@ -15,34 +17,39 @@ const navItems: NavItem[] = [
 ];
 
 export default function BottomNav() {
-  const [location] = useLocation();
+  const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border">
-      <div className="grid grid-cols-4 h-14">
+    <View style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50, backgroundColor: 'white', borderTopWidth: 1, borderColor: '#e5e7eb' }}>
+      <View style={{ flexDirection: 'row', height: 56 }}>
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = location === item.path;
+          const isActive = location.pathname === item.path;
           
           return (
             <Link
               key={item.path}
-              href={item.path}
+              to={item.path}
               data-testid={`link-nav-${item.label.toLowerCase()}`}
+              style={{ flex: 1 }}
             >
-              <button
-                className={`flex flex-col items-center justify-center h-full w-full gap-1 hover-elevate active-elevate-2 ${
-                  isActive ? "text-primary" : "text-muted-foreground"
-                }`}
+              <Pressable
+                style={{
+                  flex: 1,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 4,
+                  backgroundColor: isActive ? '#f3f4f6' : 'transparent'
+                }}
                 data-testid={`button-nav-${item.label.toLowerCase()}`}
               >
-                <Icon className="w-5 h-5" />
-                <span className="text-xs font-medium">{item.label}</span>
-              </button>
+                <Icon style={{ width: 20, height: 20, color: isActive ? '#6366f1' : '#6b7280' }} />
+                <Text style={{ fontSize: 12, fontWeight: '500', color: isActive ? '#6366f1' : '#6b7280' }}>{item.label}</Text>
+              </Pressable>
             </Link>
           );
         })}
-      </div>
-    </nav>
+      </View>
+    </View>
   );
 }
