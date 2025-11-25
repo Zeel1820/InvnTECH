@@ -1,47 +1,47 @@
-import TopBar from "@/components/TopBar";
-import BottomNav from "@/components/BottomNav";
-import QRCodeDisplay from "@/components/QRCodeDisplay";
-import LedgerEntry from "@/components/LedgerEntry";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { useLocation } from "wouter";
-import { Edit, Trash2 } from "lucide-react";
+import TopBar from '../components/TopBar';
+import BottomNav from '../components/BottomNav';
+import QRCodeDisplay from '../components/QRCodeDisplay';
+import LedgerEntry from '../components/LedgerEntry';
+import { Badge } from '../components/ui/badge';
+import { Card, CardContent, CardHeader } from '../components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Button } from '../components/ui/button';
+import { useLocation } from 'wouter';
+import { Edit, Trash2 } from 'lucide-react';
 
 //todo: remove mock functionality
 const mockItem = {
-  id: "1",
-  name: "MacBook Pro 16-inch",
-  sku: "LAPTOP-MBP16-001",
-  type: "serialized" as const,
-  serialNumber: "SN123456789",
-  status: "in_stock",
-  warehouse: "Main Warehouse",
+  id: '1',
+  name: 'MacBook Pro 16-inch',
+  sku: 'LAPTOP-MBP16-001',
+  type: 'serialized' as const,
+  serialNumber: 'SN123456789',
+  status: 'in_stock',
+  warehouse: 'Main Warehouse',
   assignedTo: null,
-  warrantyEnd: "2025-12-31",
-  description: "16-inch MacBook Pro with M2 Max chip, 32GB RAM, 1TB SSD",
+  warrantyEnd: '2025-12-31',
+  description: '16-inch MacBook Pro with M2 Max chip, 32GB RAM, 1TB SSD',
 };
 
 const mockLedger = [
   {
-    id: "1",
-    type: "in" as const,
+    id: '1',
+    type: 'in' as const,
     quantity: 1,
-    timestamp: "2024-01-15 10:30 AM",
-    user: "John Admin",
-    warehouse: "Main Warehouse",
-    reason: "Initial stock - New purchase",
-    reference: "PO-2024-001",
+    timestamp: '2024-01-15 10:30 AM',
+    user: 'John Admin',
+    warehouse: 'Main Warehouse',
+    reason: 'Initial stock - New purchase',
+    reference: 'PO-2024-001',
   },
   {
-    id: "2",
-    type: "adjust" as const,
+    id: '2',
+    type: 'adjust' as const,
     quantity: 0,
-    timestamp: "2024-01-20 02:15 PM",
-    user: "Jane Manager",
-    warehouse: "Main Warehouse",
-    reason: "Status update - Quality check completed",
+    timestamp: '2024-01-20 02:15 PM',
+    user: 'Jane Manager',
+    warehouse: 'Main Warehouse',
+    reason: 'Status update - Quality check completed',
   },
 ];
 
@@ -50,11 +50,7 @@ export default function ItemDetail() {
 
   return (
     <div className="min-h-screen bg-background pb-16">
-      <TopBar
-        title="Item Details"
-        showBack
-        onBackClick={() => setLocation("/inventory")}
-      />
+      <TopBar title="Item Details" showBack onBackClick={() => setLocation('/inventory')} />
 
       <main className="px-4 pt-4 space-y-4">
         {/* Item Header */}
@@ -65,9 +61,7 @@ export default function ItemDetail() {
                 <h1 className="text-lg font-medium" data-testid="text-item-name">
                   {mockItem.name}
                 </h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  SKU: {mockItem.sku}
-                </p>
+                <p className="text-sm text-muted-foreground mt-1">SKU: {mockItem.sku}</p>
                 {mockItem.serialNumber && (
                   <p className="text-sm font-mono text-muted-foreground">
                     Serial: {mockItem.serialNumber}
@@ -84,9 +78,15 @@ export default function ItemDetail() {
         {/* Tabs */}
         <Tabs defaultValue="details" className="w-full">
           <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="details" data-testid="tab-details">Details</TabsTrigger>
-            <TabsTrigger value="qr" data-testid="tab-qr">QR Code</TabsTrigger>
-            <TabsTrigger value="history" data-testid="tab-history">History</TabsTrigger>
+            <TabsTrigger value="details" data-testid="tab-details">
+              Details
+            </TabsTrigger>
+            <TabsTrigger value="qr" data-testid="tab-qr">
+              QR Code
+            </TabsTrigger>
+            <TabsTrigger value="history" data-testid="tab-history">
+              History
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="details" className="space-y-4 mt-4">
@@ -95,7 +95,7 @@ export default function ItemDetail() {
                 <div>
                   <label className="text-sm text-muted-foreground">Type</label>
                   <p className="font-medium">
-                    {mockItem.type === "serialized" ? "Serialized" : "Non-Serialized"}
+                    {mockItem.type === 'serialized' ? 'Serialized' : 'Non-Serialized'}
                   </p>
                 </div>
                 <div>
@@ -121,7 +121,7 @@ export default function ItemDetail() {
             <div className="grid grid-cols-2 gap-3">
               <Button
                 variant="outline"
-                onClick={() => console.log("Edit item")}
+                onClick={() => console.log('Edit item')}
                 data-testid="button-edit"
               >
                 <Edit className="w-4 h-4 mr-2" />
@@ -130,7 +130,7 @@ export default function ItemDetail() {
               <Button
                 variant="outline"
                 className="text-destructive"
-                onClick={() => console.log("Delete item")}
+                onClick={() => console.log('Delete item')}
                 data-testid="button-delete"
               >
                 <Trash2 className="w-4 h-4 mr-2" />

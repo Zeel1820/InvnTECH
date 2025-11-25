@@ -1,5 +1,5 @@
 // Reference: blueprint:javascript_log_in_with_replit
-import { Button } from '@/components/ui/button';
+import { Button } from '../components/ui/button';
 import { Package, QrCode, BarChart3, Warehouse } from 'lucide-react';
 
 export default function Landing() {

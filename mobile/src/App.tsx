@@ -1,11 +1,10 @@
-
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { NativeRouter, Route, Routes } from 'react-router-native';
 
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
-import Scan from './pages/Scan';
+import Scan from './pages/Scanner';
 import Reports from './pages/Reports';
 import BottomNav from './components/BottomNav';
 

@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { queryClient, apiRequest } from '../lib/queryClient';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from '../components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +20,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '../components/ui/alert-dialog';
 import {
   Form,
   FormControl,
@@ -28,15 +28,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { insertWarehouseSchema, type Warehouse } from "@shared/schema";
-import { Plus, MapPin, Edit, Trash2, AlertCircle } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import type { z } from "zod";
+} from '../components/ui/form';
+import { Input } from '../components/ui/input';
+import { useToast } from '../hooks/use-toast';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { insertWarehouseSchema, type Warehouse } from '../../../shared/schema';
+import { Plus, MapPin, Edit, Trash2, AlertCircle } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import type { z } from 'zod';
 
 type WarehouseFormData = z.infer<typeof insertWarehouseSchema>;
 
@@ -47,8 +47,12 @@ export default function Warehouses() {
   const [editingWarehouse, setEditingWarehouse] = useState<Warehouse | null>(null);
   const [deleteWarehouse, setDeleteWarehouse] = useState<Warehouse | null>(null);
 
-  const { data: warehouses, isLoading, error } = useQuery<Warehouse[]>({
-    queryKey: ["/api/warehouses"],
+  const {
+    data: warehouses,
+    isLoading,
+    error,
+  } = useQuery<Warehouse[]>({
+    queryKey: ['/api/warehouses'],
   });
 
   const isAdmin = user?.role === 'admin';
@@ -56,76 +60,76 @@ export default function Warehouses() {
   const form = useForm<WarehouseFormData>({
     resolver: zodResolver(insertWarehouseSchema),
     defaultValues: {
-      name: "",
-      location: "",
+      name: '',
+      location: '',
     },
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: WarehouseFormData) => {
-      const res = await apiRequest("POST", "/api/warehouses", data);
+      const res = await apiRequest('POST', '/api/warehouses', data);
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/warehouses"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouses'] });
       setDialogOpen(false);
       form.reset();
       toast({
-        title: "Success",
-        description: "Warehouse created successfully",
+        title: 'Success',
+        description: 'Warehouse created successfully',
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<WarehouseFormData> }) => {
-      const res = await apiRequest("PATCH", `/api/warehouses/${id}`, data);
+      const res = await apiRequest('PATCH', `/api/warehouses/${id}`, data);
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/warehouses"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouses'] });
       setDialogOpen(false);
       setEditingWarehouse(null);
       form.reset();
       toast({
-        title: "Success",
-        description: "Warehouse updated successfully",
+        title: 'Success',
+        description: 'Warehouse updated successfully',
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await apiRequest("DELETE", `/api/warehouses/${id}`, undefined);
+      const res = await apiRequest('DELETE', `/api/warehouses/${id}`, undefined);
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/warehouses"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouses'] });
       setDeleteWarehouse(null);
       toast({
-        title: "Success",
-        description: "Warehouse deleted successfully",
+        title: 'Success',
+        description: 'Warehouse deleted successfully',
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -142,7 +146,7 @@ export default function Warehouses() {
     setEditingWarehouse(warehouse);
     form.reset({
       name: warehouse.name,
-      location: warehouse.location || "",
+      location: warehouse.location || '',
     });
     setDialogOpen(true);
   };
@@ -150,8 +154,8 @@ export default function Warehouses() {
   const handleAddNew = () => {
     setEditingWarehouse(null);
     form.reset({
-      name: "",
-      location: "",
+      name: '',
+      location: '',
     });
     setDialogOpen(true);
   };
@@ -173,9 +177,7 @@ export default function Warehouses() {
             <p className="text-destructive text-center font-medium mb-2">
               Failed to load warehouses
             </p>
-            <p className="text-sm text-muted-foreground text-center">
-              {(error as Error).message}
-            </p>
+            <p className="text-sm text-muted-foreground text-center">{(error as Error).message}</p>
           </CardContent>
         </Card>
       </div>
@@ -200,78 +202,78 @@ export default function Warehouses() {
                   Add Warehouse
                 </Button>
               </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {editingWarehouse ? "Edit Warehouse" : "Add New Warehouse"}
-                </DialogTitle>
-              </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Main Warehouse"
-                            data-testid="input-warehouse-name"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="location"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Location</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            value={field.value || ""}
-                            placeholder="123 Main St, City, State"
-                            data-testid="input-warehouse-location"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex justify-end gap-2 pt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setDialogOpen(false);
-                        setEditingWarehouse(null);
-                        form.reset();
-                      }}
-                      data-testid="button-cancel"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={createMutation.isPending || updateMutation.isPending}
-                      data-testid="button-submit-warehouse"
-                    >
-                      {createMutation.isPending || updateMutation.isPending
-                        ? "Saving..."
-                        : editingWarehouse
-                        ? "Update"
-                        : "Create"}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingWarehouse ? 'Edit Warehouse' : 'Add New Warehouse'}
+                  </DialogTitle>
+                </DialogHeader>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Main Warehouse"
+                              data-testid="input-warehouse-name"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="location"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Location</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              value={field.value || ''}
+                              placeholder="123 Main St, City, State"
+                              data-testid="input-warehouse-location"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex justify-end gap-2 pt-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setDialogOpen(false);
+                          setEditingWarehouse(null);
+                          form.reset();
+                        }}
+                        data-testid="button-cancel"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={createMutation.isPending || updateMutation.isPending}
+                        data-testid="button-submit-warehouse"
+                      >
+                        {createMutation.isPending || updateMutation.isPending
+                          ? 'Saving...'
+                          : editingWarehouse
+                          ? 'Update'
+                          : 'Create'}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
           )}
         </div>
 
@@ -280,7 +282,8 @@ export default function Warehouses() {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Warehouse</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete "{deleteWarehouse?.name}"? This action cannot be undone.
+                Are you sure you want to delete "{deleteWarehouse?.name}"? This action cannot be
+                undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -290,7 +293,7 @@ export default function Warehouses() {
                 disabled={deleteMutation.isPending}
                 data-testid="button-confirm-delete"
               >
-                {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -310,7 +313,10 @@ export default function Warehouses() {
             {warehouses?.map((warehouse) => (
               <Card key={warehouse.id} data-testid={`card-warehouse-${warehouse.id}`}>
                 <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                  <CardTitle className="text-lg font-medium" data-testid={`text-warehouse-name-${warehouse.id}`}>
+                  <CardTitle
+                    className="text-lg font-medium"
+                    data-testid={`text-warehouse-name-${warehouse.id}`}
+                  >
                     {warehouse.name}
                   </CardTitle>
                   {isAdmin && (
@@ -338,7 +344,10 @@ export default function Warehouses() {
                   {warehouse.location && (
                     <div className="flex items-start gap-2 mb-2">
                       <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
-                      <p className="text-sm text-muted-foreground" data-testid={`text-warehouse-location-${warehouse.id}`}>
+                      <p
+                        className="text-sm text-muted-foreground"
+                        data-testid={`text-warehouse-location-${warehouse.id}`}
+                      >
                         {warehouse.location}
                       </p>
                     </div>
