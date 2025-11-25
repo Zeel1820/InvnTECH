@@ -1,5 +1,6 @@
 import { Badge } from "./ui/badge";
-import { ChevronRight, Package } from "lucide-react";
+import { ChevronRight, Package } from "lucide-react-native";
+import { View, Text, Pressable } from 'react-native';
 
 interface InventoryListItemProps {
   id: string;
@@ -9,7 +10,7 @@ interface InventoryListItemProps {
   quantity?: number;
   status: "in_stock" | "low_stock" | "out_of_stock" | "issued" | "under_repair";
   warehouse?: string;
-  onClick?: () => void;
+  onPress?: () => void;
 }
 
 const statusConfig = {
@@ -28,42 +29,42 @@ export default function InventoryListItem({
   quantity,
   status,
   warehouse,
-  onClick,
+  onPress,
 }: InventoryListItemProps) {
   const statusInfo = statusConfig[status];
 
   return (
-    <div
-      className="flex items-center gap-3 p-4 bg-card border border-card-border rounded-lg hover-elevate active-elevate-2 cursor-pointer"
-      onClick={onClick}
+    <Pressable
+      className="flex-row items-center gap-3 p-4 bg-card border border-card-border rounded-lg"
+      onPress={onPress}
       data-testid={`item-inventory-${id}`}
     >
-      <div className="flex items-center justify-center w-12 h-12 bg-muted rounded-lg">
+      <View className="flex items-center justify-center w-12 h-12 bg-muted rounded-lg">
         <Package className="w-6 h-6 text-muted-foreground" />
-      </div>
+      </View>
       
-      <div className="flex-1 min-w-0">
-        <h3 className="font-medium text-base truncate" data-testid={`text-name-${id}`}>{name}</h3>
-        <p className="text-sm text-muted-foreground">
+      <View className="flex-1 min-w-0">
+        <Text className="font-medium text-base truncate" data-testid={`text-name-${id}`}>{name}</Text>
+        <Text className="text-sm text-muted-foreground">
           SKU: {sku} • {type === "serialized" ? "Serialized" : "Batch"}
-        </p>
+        </Text>
         {warehouse && (
-          <p className="text-xs text-muted-foreground mt-0.5">{warehouse}</p>
+          <Text className="text-xs text-muted-foreground mt-0.5">{warehouse}</Text>
         )}
-      </div>
+      </View>
       
-      <div className="flex flex-col items-end gap-1">
+      <View className="flex-col items-end gap-1">
         <Badge className={statusInfo.className} data-testid={`badge-status-${id}`}>
           {statusInfo.label}
         </Badge>
         {type === "non-serialized" && quantity !== undefined && (
-          <span className="text-sm font-mono font-medium" data-testid={`text-quantity-${id}`}>
+          <Text className="text-sm font-mono font-medium" data-testid={`text-quantity-${id}`}>
             Qty: {quantity}
-          </span>
+          </Text>
         )}
-      </div>
+      </View>
       
       <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-    </div>
+    </Pressable>
   );
 }

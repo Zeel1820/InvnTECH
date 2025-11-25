@@ -48,8 +48,10 @@ import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Separator } from '../components/ui/separator';
-import { Package, Plus, Edit, Trash2, AlertCircle, Loader2, QrCode, Printer } from 'lucide-react';
+import { Package, Plus, Edit, Trash2, AlertCircle, Loader2, QrCode, Printer } from 'lucide-react-native';
 import { QRCodeSVG } from 'qrcode.react';
+import { View, Text } from 'react-native';
+import { useNavigate } from 'react-router-native';
 
 type ItemFormData = z.infer<typeof insertItemSchema>;
 
@@ -68,6 +70,7 @@ export default function Items() {
   const [bulkSerialStartIndex, setBulkSerialStartIndex] = useState<string>('');
   const [bulkSerialWarehouse, setBulkSerialWarehouse] = useState<string>('');
   const [bulkSerialResult, setBulkSerialResult] = useState<BulkSerialResult | null>(null);
+  const navigate = useNavigate();
 
   const {
     data: items,
@@ -283,58 +286,58 @@ export default function Items() {
   };
 
   const handlePrintQRCodes = () => {
-    window.print();
+    // Implement printing functionality for React Native
   };
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <View className="flex flex-col items-center justify-center min-h-screen p-4">
         <AlertCircle className="w-12 h-12 text-destructive mb-4" />
-        <h2 className="text-lg font-semibold mb-2" data-testid="text-error-title">
+        <Text className="text-lg font-semibold mb-2" data-testid="text-error-title">
           Error Loading Items
-        </h2>
-        <p className="text-sm text-muted-foreground" data-testid="text-error-message">
+        </Text>
+        <Text className="text-sm text-muted-foreground" data-testid="text-error-message">
           {error instanceof Error ? error.message : 'An error occurred'}
-        </p>
-      </div>
+        </Text>
+      </View>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-16">
+    <View className="min-h-screen bg-background pb-16">
       <TopBar
         title="Items"
         showBack={true}
-        onBackClick={() => (window.location.href = '/dashboard')}
+        onBackClick={() => navigate('/dashboard')}
         showSearch={false}
       />
 
-      <main className="px-4 pt-4 space-y-4">
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-muted-foreground">Manage your inventory items</p>
+      <View className="px-4 pt-4 space-y-4">
+        <View className="flex items-center justify-between mb-4">
+          <Text className="text-sm text-muted-foreground">Manage your inventory items</Text>
           {canEdit && (
-            <Button onClick={handleOpenDialog} data-testid="button-add-item">
+            <Button onPress={handleOpenDialog} data-testid="button-add-item">
               <Plus className="w-4 h-4 mr-2" />
-              Add Item
+              <Text>Add Item</Text>
             </Button>
           )}
-        </div>
+        </View>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
+          <View className="flex items-center justify-center py-12">
             <Loader2
               className="w-8 h-8 animate-spin text-muted-foreground"
               data-testid="loader-items"
             />
-          </div>
+          </View>
         ) : items && items.length > 0 ? (
-          <div className="grid grid-cols-1 gap-3 pb-4">
+          <View className="grid grid-cols-1 gap-3 pb-4">
             {items.map((item) => (
               <Card
                 key={item.id}
                 data-testid={`card-item-${item.id}`}
                 className="hover-elevate cursor-pointer"
-                onClick={() => handleEdit(item)}
+                onPress={() => handleEdit(item)}
               >
                 <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                   <CardTitle
@@ -344,11 +347,11 @@ export default function Items() {
                     {item.name}
                   </CardTitle>
                   {canEdit && (
-                    <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                    <View className="flex gap-1" onPress={(e) => e.stopPropagation()}>
                       <Button
                         size="icon"
                         variant="ghost"
-                        onClick={() => handleEdit(item)}
+                        onPress={() => handleEdit(item)}
                         data-testid={`button-edit-item-${item.id}`}
                       >
                         <Edit className="w-4 h-4" />
@@ -357,71 +360,71 @@ export default function Items() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={() => setDeleteItem(item)}
+                          onPress={() => setDeleteItem(item)}
                           data-testid={`button-delete-item-${item.id}`}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       )}
-                    </div>
+                    </View>
                   )}
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">SKU: </span>
-                      <span className="font-mono" data-testid={`text-item-sku-${item.id}`}>
+                  <View className="space-y-2 text-sm">
+                    <View>
+                      <Text className="text-muted-foreground">SKU: </Text>
+                      <Text className="font-mono" data-testid={`text-item-sku-${item.id}`}>
                         {item.sku}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Type: </span>
-                      <span className="capitalize" data-testid={`text-item-type-${item.id}`}>
+                      </Text>
+                    </View>
+                    <View>
+                      <Text className="text-muted-foreground">Type: </Text>
+                      <Text className="capitalize" data-testid={`text-item-type-${item.id}`}>
                         {item.type}
-                      </span>
-                    </div>
+                      </Text>
+                    </View>
                     {item.category && (
-                      <div>
-                        <span className="text-muted-foreground">Category: </span>
-                        <span data-testid={`text-item-category-${item.id}`}>{item.category}</span>
-                      </div>
+                      <View>
+                        <Text className="text-muted-foreground">Category: </Text>
+                        <Text data-testid={`text-item-category-${item.id}`}>{item.category}</Text>
+                      </View>
                     )}
                     {item.description && (
-                      <p
+                      <Text
                         className="text-muted-foreground text-xs mt-2"
                         data-testid={`text-item-description-${item.id}`}
                       >
                         {item.description}
-                      </p>
+                      </Text>
                     )}
-                  </div>
+                  </View>
                 </CardContent>
               </Card>
             ))}
-          </div>
+          </View>
         ) : (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Package className="w-16 h-16 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2" data-testid="text-empty-title">
+              <Text className="text-lg font-medium mb-2" data-testid="text-empty-title">
                 No Items Yet
-              </h3>
-              <p
+              </Text>
+              <Text
                 className="text-sm text-muted-foreground mb-4"
                 data-testid="text-empty-description"
               >
                 Get started by adding your first inventory item.
-              </p>
+              </Text>
               {canEdit && (
-                <Button onClick={handleOpenDialog} data-testid="button-empty-add">
+                <Button onPress={handleOpenDialog} data-testid="button-empty-add">
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Item
+                  <Text>Add Item</Text>
                 </Button>
               )}
             </CardContent>
           </Card>
         )}
-      </main>
+      </View>
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -438,7 +441,7 @@ export default function Items() {
           </DialogHeader>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <View onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="name"
@@ -586,11 +589,11 @@ export default function Items() {
                     <FormLabel>Reorder Level</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
+                        keyboardType="numeric"
                         {...field}
-                        value={field.value ?? ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
+                        value={field.value ? String(field.value) : ''}
+                        onChangeText={(text) => {
+                          const val = text;
                           if (val === '') {
                             field.onChange(undefined);
                           } else {
@@ -613,52 +616,51 @@ export default function Items() {
                 <>
                   <Separator className="my-4" />
 
-                  <div className="space-y-3" data-testid="section-bulk-serial-creation">
-                    <div className="flex items-center gap-2">
+                  <View className="space-y-3" data-testid="section-bulk-serial-creation">
+                    <View className="flex items-center gap-2">
                       <QrCode className="w-4 h-4" />
-                      <h4 className="text-sm font-medium">Bulk Serial Creation</h4>
-                    </div>
+                      <Text className="text-sm font-medium">Bulk Serial Creation</Text>
+                    </View>
 
                     {!editingItem ? (
-                      <div className="rounded-md bg-muted p-3">
-                        <p className="text-xs text-muted-foreground">
+                      <View className="rounded-md bg-muted p-3">
+                        <Text className="text-xs text-muted-foreground">
                           Save this item first, then you can generate multiple serial numbers with
                           QR codes at once.
-                        </p>
-                      </div>
+                        </Text>
+                      </View>
                     ) : (
                       <>
-                        <p className="text-xs text-muted-foreground">
+                        <Text className="text-xs text-muted-foreground">
                           Generate multiple serial numbers at once for this item
-                        </p>
+                        </Text>
 
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium" htmlFor="bulk-quantity">
+                        <View className="grid grid-cols-2 gap-3">
+                          <View className="space-y-2">
+                            <Text className="text-sm font-medium" htmlFor="bulk-quantity">
                               Quantity
-                            </label>
+                            </Text>
                             <Input
                               id="bulk-quantity"
-                              type="number"
+                              keyboardType="numeric"
                               min="1"
                               max="1000"
                               placeholder="e.g., 50"
                               value={bulkSerialQuantity}
-                              onChange={(e) => setBulkSerialQuantity(e.target.value)}
+                              onChangeText={setBulkSerialQuantity}
                               data-testid="input-bulk-quantity"
                             />
-                          </div>
+                          </View>
 
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium" htmlFor="bulk-start-index">
+                          <View className="space-y-2">
+                            <Text className="text-sm font-medium" htmlFor="bulk-start-index">
                               Start Index
-                            </label>
+                            </Text>
                             <Input
                               id="bulk-start-index"
-                              type="text"
                               placeholder={editingItem.sku}
                               value={bulkSerialStartIndex}
-                              onChange={(e) => setBulkSerialStartIndex(e.target.value)}
+                              onChangeText={setBulkSerialStartIndex}
                               onFocus={(e) => {
                                 if (!e.target.value) {
                                   setBulkSerialStartIndex(editingItem.sku);
@@ -666,13 +668,13 @@ export default function Items() {
                               }}
                               data-testid="input-bulk-start-index"
                             />
-                          </div>
-                        </div>
+                          </View>
+                        </View>
 
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium" htmlFor="bulk-warehouse">
+                        <View className="space-y-2">
+                          <Text className="text-sm font-medium" htmlFor="bulk-warehouse">
                             Warehouse
-                          </label>
+                          </Text>
                           <Select
                             value={bulkSerialWarehouse}
                             onValueChange={setBulkSerialWarehouse}
@@ -692,17 +694,17 @@ export default function Items() {
                               ))}
                             </SelectContent>
                           </Select>
-                          <p className="text-xs text-muted-foreground">
+                          <Text className="text-xs text-muted-foreground">
                             Serial numbers will be: {bulkSerialStartIndex || editingItem.sku}-0001,{' '}
                             {bulkSerialStartIndex || editingItem.sku}-0002, ...
-                          </p>
-                        </div>
+                          </Text>
+                        </View>
 
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={handleBulkSerialCreate}
+                          onPress={handleBulkSerialCreate}
                           disabled={bulkSerialMutation.isPending}
                           className="w-full"
                           data-testid="button-bulk-create-serials"
@@ -710,18 +712,18 @@ export default function Items() {
                           {bulkSerialMutation.isPending ? (
                             <>
                               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                              Creating...
+                              <Text>Creating...</Text>
                             </>
                           ) : (
                             <>
                               <QrCode className="w-4 h-4 mr-2" />
-                              Create Serials
+                              <Text>Create Serials</Text>
                             </>
                           )}
                         </Button>
                       </>
                     )}
-                  </div>
+                  </View>
                 </>
               )}
 
@@ -729,10 +731,10 @@ export default function Items() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setDialogOpen(false)}
+                  onPress={() => setDialogOpen(false)}
                   data-testid="button-cancel-item"
                 >
-                  Cancel
+                  <Text>Cancel</Text>
                 </Button>
                 <Button
                   type="submit"
@@ -742,16 +744,16 @@ export default function Items() {
                   {createMutation.isPending || updateMutation.isPending ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Saving...
+                      <Text>Saving...</Text>
                     </>
                   ) : editingItem ? (
-                    'Update'
+                    <Text>Update</Text>
                   ) : (
-                    'Create'
+                    <Text>Create</Text>
                   )}
                 </Button>
               </DialogFooter>
-            </form>
+            </View>
           </Form>
         </DialogContent>
       </Dialog>
@@ -768,22 +770,22 @@ export default function Items() {
           <AlertDialogFooter>
             <AlertDialogCancel
               data-testid="button-cancel-delete"
-              onClick={() => setDeleteItem(null)}
+              onPress={() => setDeleteItem(null)}
             >
-              Cancel
+              <Text>Cancel</Text>
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteItem && deleteMutation.mutate(deleteItem.id)}
+              onPress={() => deleteItem && deleteMutation.mutate(deleteItem.id)}
               disabled={deleteMutation.isPending}
               data-testid="button-confirm-delete"
             >
               {deleteMutation.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Deleting...
+                  <Text>Deleting...</Text>
                 </>
               ) : (
-                'Delete'
+                <Text>Delete</Text>
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -806,51 +808,51 @@ export default function Items() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="rounded-md bg-muted p-4 print:bg-white">
-              <p className="text-sm font-medium mb-4 print:hidden">QR Codes Preview:</p>
-              <div className="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto print:grid-cols-4 print:max-h-none print:gap-6">
+          <View className="space-y-4">
+            <View className="rounded-md bg-muted p-4 print:bg-white">
+              <Text className="text-sm font-medium mb-4 print:hidden">QR Codes Preview:</Text>
+              <View className="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto print:grid-cols-4 print:max-h-none print:gap-6">
                 {bulkSerialResult?.serials.map((serial) => (
-                  <div
+                  <View
                     key={serial.id}
                     className="flex flex-col items-center gap-2 p-3 bg-background rounded print:break-inside-avoid print:bg-white print:border print:border-gray-300"
                     data-testid={`qr-code-${serial.id}`}
                   >
                     {serial.qrToken && <QRCodeSVG value={serial.qrToken} size={120} level="M" />}
-                    <p
+                    <Text
                       className="text-xs font-mono text-center break-all"
                       data-testid={`text-serial-${serial.id}`}
                     >
                       {serial.serialNumber}
-                    </p>
-                  </div>
+                    </Text>
+                  </View>
                 ))}
-              </div>
-            </div>
+              </View>
+            </View>
 
-            <p className="text-xs text-muted-foreground print:hidden">
+            <Text className="text-xs text-muted-foreground print:hidden">
               Click "Print QR Codes" to print these QR codes. You can also view and manage these
               serial numbers in the Inventory section.
-            </p>
-          </div>
+            </Text>
+          </View>
 
           <DialogFooter className="flex gap-2 print:hidden">
             <Button
               variant="outline"
-              onClick={() => setBulkSerialResult(null)}
+              onPress={() => setBulkSerialResult(null)}
               data-testid="button-bulk-success-close"
             >
-              Close
+              <Text>Close</Text>
             </Button>
-            <Button onClick={handlePrintQRCodes} data-testid="button-print-qr-codes">
+            <Button onPress={handlePrintQRCodes} data-testid="button-print-qr-codes">
               <Printer className="w-4 h-4 mr-2" />
-              Print QR Codes
+              <Text>Print QR Codes</Text>
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <BottomNav />
-    </div>
+    </View>
   );
 }

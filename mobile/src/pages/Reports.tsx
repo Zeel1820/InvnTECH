@@ -10,7 +10,8 @@ import {
   AlertTriangle,
   ArrowRightLeft,
   Package,
-} from 'lucide-react';
+} from 'lucide-react-native';
+import { View, Text } from 'react-native';
 
 const reportTypes = [
   {
@@ -64,65 +65,65 @@ export default function Reports() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-16">
+    <View className="min-h-screen bg-background pb-16">
       <TopBar title="Reports" onMenuClick={() => console.log('Menu clicked')} />
 
-      <main className="px-4 pt-4 space-y-4">
+      <View className="px-4 pt-4 space-y-4">
         {/* Export Button */}
         <Button
           variant="outline"
           className="w-full"
-          onClick={handleExport}
+          onPress={handleExport}
           data-testid="button-export-all"
         >
           <Download className="w-4 h-4 mr-2" />
-          Export All Reports
+          <Text>Export All Reports</Text>
         </Button>
 
         {/* Report Types */}
-        <div className="space-y-3">
+        <View className="space-y-3">
           {reportTypes.map((report) => {
             const Icon = report.icon;
             return (
               <Card
                 key={report.id}
                 className="hover-elevate cursor-pointer"
-                onClick={() => handleGenerateReport(report.id)}
+                onPress={() => handleGenerateReport(report.id)}
                 data-testid={`card-report-${report.id}`}
               >
                 <CardHeader className="pb-3">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <View className="flex items-start gap-3">
+                    <View className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <Icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-base">{report.title}</h3>
-                      <p className="text-sm text-muted-foreground mt-1">{report.description}</p>
-                    </div>
-                  </div>
+                    </View>
+                    <View className="flex-1 min-w-0">
+                      <Text className="font-medium text-base">{report.title}</Text>
+                      <Text className="text-sm text-muted-foreground mt-1">{report.description}</Text>
+                    </View>
+                  </View>
                 </CardHeader>
                 <CardContent>
                   <Button
                     variant="outline"
                     size="sm"
                     className="w-full"
-                    onClick={(e) => {
+                    onPress={(e: any) => {
                       e.stopPropagation();
                       handleGenerateReport(report.id);
                     }}
                     data-testid={`button-generate-${report.id}`}
                   >
                     <BarChart3 className="w-4 h-4 mr-2" />
-                    Generate Report
+                    <Text>Generate Report</Text>
                   </Button>
                 </CardContent>
               </Card>
             );
           })}
-        </div>
-      </main>
+        </View>
+      </View>
 
       <BottomNav />
-    </div>
+    </View>
   );
 }

@@ -6,9 +6,10 @@ import InventoryListItem from '../components/InventoryListItem';
 import EmptyState from '../components/EmptyState';
 import FloatingActionButton from '../components/FloatingActionButton';
 import { Button } from '../components/ui/button';
-import { Filter, Plus, Package } from 'lucide-react';
+import { Filter, Plus, Package } from 'lucide-react-native';
 import { useState } from 'react';
-import { useLocation } from 'wouter';
+import { useNavigate } from 'react-router-native';
+import { View, Text } from 'react-native';
 
 //todo: remove mock functionality
 const mockInventory = [
@@ -57,7 +58,7 @@ const mockInventory = [
 ];
 
 export default function Inventory() {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const [filters, setFilters] = useState([
     { id: '1', label: 'Type', value: 'Serialized' },
     { id: '2', label: 'Warehouse', value: 'Main' },
@@ -66,14 +67,14 @@ export default function Inventory() {
   const [items] = useState(mockInventory);
 
   return (
-    <div className="min-h-screen bg-background pb-16">
+    <View className="min-h-screen bg-background pb-16">
       <TopBar
         title="Inventory"
         showSearch={false}
         onMenuClick={() => console.log('Menu clicked')}
       />
 
-      <main className="px-4 pt-4 space-y-4">
+      <View className="px-4 pt-4 space-y-4">
         {/* Search */}
         <SearchBar
           placeholder="Search by SKU, name, or serial..."
@@ -85,7 +86,7 @@ export default function Inventory() {
         />
 
         {/* Filters */}
-        <div className="flex items-center gap-2">
+        <View className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -95,7 +96,7 @@ export default function Inventory() {
             <Filter className="w-4 h-4 mr-2" />
             Filters
           </Button>
-          <div className="flex-1">
+          <View className="flex-1">
             <FilterChips
               filters={filters}
               onRemove={(id) => {
@@ -103,15 +104,15 @@ export default function Inventory() {
                 setFilters(filters.filter((f) => f.id !== id));
               }}
             />
-          </div>
-        </div>
+          </View>
+        </View>
 
         {/* Results count */}
-        <p className="text-sm text-muted-foreground">Showing {items.length} items</p>
+        <Text className="text-sm text-muted-foreground">Showing {items.length} items</Text>
 
         {/* Inventory List */}
         {items.length > 0 ? (
-          <div className="space-y-3 pb-4">
+          <View className="space-y-3 pb-4">
             {items.map((item) => (
               <InventoryListItem
                 key={item.id}
@@ -119,7 +120,7 @@ export default function Inventory() {
                 onClick={() => console.log('View item:', item.id)}
               />
             ))}
-          </div>
+          </View>
         ) : (
           <EmptyState
             icon={Package}
@@ -129,16 +130,16 @@ export default function Inventory() {
             onAction={() => setFilters([])}
           />
         )}
-      </main>
+      </View>
 
       <FloatingActionButton
         icon={Plus}
         label="Add Item"
-        onClick={() => setLocation('/items')}
+        onClick={() => navigate('/items')}
         data-testid="button-add-item"
       />
 
       <BottomNav />
-    </div>
+    </View>
   );
 }

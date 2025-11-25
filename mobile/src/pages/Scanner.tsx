@@ -11,13 +11,13 @@ import {
   Loader2,
   AlertCircle,
   User,
-} from 'lucide-react';
+} from 'lucide-react-native';
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Html5Qrcode } from 'html5-qrcode';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useToast } from '../hooks/use-toast';
-import { useLocation } from 'wouter';
+import { useNavigate } from 'react-router-native';
 import type { Item, Serial } from '../../../shared/schema';
 import {
   Dialog,
@@ -35,6 +35,7 @@ import {
   SelectValue,
 } from '../components/ui/select';
 import { apiRequest, queryClient } from '../lib/queryClient';
+import { View, Text } from 'react-native';
 
 interface LookupResult {
   type: 'serial' | 'item';
@@ -61,7 +62,7 @@ export default function Scanner() {
     null,
   );
   const [selectedUserId, setSelectedUserId] = useState<string>('');
-  const [, navigate] = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
   const scannerRef = useRef<HTMLDivElement>(null);
@@ -225,16 +226,16 @@ export default function Scanner() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-16">
+    <View className="min-h-screen bg-background pb-16">
       <TopBar title="QR Scanner" showBack={true} onBackClick={() => navigate('/dashboard')} />
 
-      <main className="px-4 pt-4 space-y-6">
+      <View className="px-4 pt-4 space-y-6">
         {/* Loading State */}
         {isLookingUp && (
           <Card>
             <CardContent className="flex items-center justify-center py-8">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <p className="ml-3 text-sm">Looking up...</p>
+              <Text className="ml-3 text-sm">Looking up...</Text>
             </CardContent>
           </Card>
         )}
@@ -243,18 +244,18 @@ export default function Scanner() {
           <>
             {/* Camera Viewfinder */}
             <Card className="overflow-hidden">
-              <div className="relative aspect-square bg-muted">
-                <div id="qr-reader" ref={scannerRef} className="w-full h-full" />
+              <View className="relative aspect-square bg-muted">
+                <View id="qr-reader" ref={scannerRef} className="w-full h-full" />
                 {!scanning && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-muted">
+                  <View className="absolute inset-0 flex items-center justify-center bg-muted">
                     <Camera className="w-24 h-24 text-muted-foreground" />
-                  </div>
+                  </View>
                 )}
-              </div>
+              </View>
             </Card>
 
             {/* Camera Controls */}
-            <div className="grid grid-cols-2 gap-4">
+            <View className="grid grid-cols-2 gap-4">
               {scanning ? (
                 <Button
                   variant="destructive"
@@ -287,7 +288,7 @@ export default function Scanner() {
                   </Button>
                 </>
               )}
-            </div>
+            </View>
           </>
         ) : (
           <Card>
@@ -298,18 +299,18 @@ export default function Scanner() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Enter SKU or Serial Number</label>
+              <View>
+                <Text className="text-sm font-medium mb-2 block">Enter SKU or Serial Number</Text>
                 <Input
                   type="text"
                   placeholder="e.g., LAP-001-0001 or LAPTOP-SKU"
                   value={manualEntry}
-                  onChange={(e) => setManualEntry(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleManualSubmit()}
+                  onChangeText={setManualEntry}
+                  onSubmitEditing={handleManualSubmit}
                   data-testid="input-manual-entry"
                   autoFocus
                 />
-              </div>
+              </View>
               <Button
                 size="lg"
                 className="w-full"
@@ -320,12 +321,12 @@ export default function Scanner() {
                 {isLookingUp ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Looking up...
+                    <Text>Looking up...</Text>
                   </>
                 ) : (
                   <>
                     <Package className="w-4 h-4 mr-2" />
-                    Look Up
+                    <Text>Look Up</Text>
                   </>
                 )}
               </Button>
@@ -344,33 +345,33 @@ export default function Scanner() {
           data-testid="button-toggle-mode"
         >
           <Keyboard className="w-5 h-5 mr-2" />
-          {scanMode === 'camera' ? 'Switch to Manual Entry' : 'Switch to Camera Scan'}
+          <Text>{scanMode === 'camera' ? 'Switch to Manual Entry' : 'Switch to Camera Scan'}</Text>
         </Button>
 
         {/* Instructions */}
         <Card>
           <CardContent className="pt-6">
-            <h3 className="font-medium mb-2 flex items-center gap-2">
+            <Text className="font-medium mb-2 flex items-center gap-2">
               <AlertCircle className="w-4 h-4" />
               Instructions
-            </h3>
-            <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+            </Text>
+            <View className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
               {scanMode === 'camera' ? (
                 <>
-                  <li>Click "Start Scan" to activate the camera</li>
-                  <li>Point camera at QR code and hold steady</li>
-                  <li>Scanner will automatically detect and lookup the item</li>
-                  <li>Upload an image if you have a QR code screenshot</li>
+                  <Text><li>Click "Start Scan" to activate the camera</li></Text>
+                  <Text><li>Point camera at QR code and hold steady</li></Text>
+                  <Text><li>Scanner will automatically detect and lookup the item</li></Text>
+                  <Text><li>Upload an image if you have a QR code screenshot</li></Text>
                 </>
               ) : (
                 <>
-                  <li>Enter the exact SKU or serial number</li>
-                  <li>Serial numbers are usually formatted like: SKU-0001</li>
-                  <li>Press Enter or click "Look Up" to search</li>
-                  <li>Results will appear automatically if found</li>
+                  <Text><li>Enter the exact SKU or serial number</li></Text>
+                  <Text><li>Serial numbers are usually formatted like: SKU-0001</li></Text>
+                  <Text><li>Press Enter or click "Look Up" to search</li></Text>
+                  <Text><li>Results will appear automatically if found</li></Text>
                 </>
               )}
-            </ul>
+            </View>
           </CardContent>
         </Card>
       </main>
@@ -388,36 +389,36 @@ export default function Scanner() {
             <DialogDescription>Review the item details before proceeding</DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm font-medium">Name:</span>
-                <span className="text-sm">{pendingConsumption?.item.name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm font-medium">SKU:</span>
-                <span className="text-sm font-mono">{pendingConsumption?.item.sku}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm font-medium">Type:</span>
-                <span className="text-sm capitalize">{pendingConsumption?.item.type}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm font-medium">Action:</span>
-                <span className="text-sm font-semibold capitalize">
+          <View className="space-y-4 py-4">
+            <View className="space-y-2">
+              <View className="flex justify-between">
+                <Text className="text-sm font-medium">Name:</Text>
+                <Text className="text-sm">{pendingConsumption?.item.name}</Text>
+              </View>
+              <View className="flex justify-between">
+                <Text className="text-sm font-medium">SKU:</Text>
+                <Text className="text-sm font-mono">{pendingConsumption?.item.sku}</Text>
+              </View>
+              <View className="flex justify-between">
+                <Text className="text-sm font-medium">Type:</Text>
+                <Text className="text-sm capitalize">{pendingConsumption?.item.type}</Text>
+              </View>
+              <View className="flex justify-between">
+                <Text className="text-sm font-medium">Action:</Text>
+                <Text className="text-sm font-semibold capitalize">
                   {pendingConsumption?.item.consumptionType === 'sellable'
                     ? 'Sell'
                     : pendingConsumption?.item.consumptionType === 'loanable'
                     ? 'Loan'
                     : 'Consume'}
-                </span>
-              </div>
-            </div>
+                </Text>
+              </View>
+            </View>
 
             {/* Show user selector only for loanable items */}
             {pendingConsumption?.item.consumptionType === 'loanable' && (
-              <div>
-                <label className="text-sm font-medium mb-2 block">Assign To</label>
+              <View>
+                <Text className="text-sm font-medium mb-2 block">Assign To</Text>
                 <Select value={selectedUserId} onValueChange={setSelectedUserId}>
                   <SelectTrigger data-testid="select-loan-user">
                     <SelectValue placeholder="Choose a user..." />
@@ -434,9 +435,9 @@ export default function Scanner() {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </View>
             )}
-          </div>
+          </View>
 
           <DialogFooter>
             <Button
@@ -483,19 +484,19 @@ export default function Scanner() {
               {consumeMutation.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Processing...
+                  <Text>Processing...</Text>
                 </>
               ) : pendingConsumption?.item.consumptionType === 'sellable' ? (
-                'Confirm Sale'
+                <Text>Confirm Sale</Text>
               ) : pendingConsumption?.item.consumptionType === 'loanable' ? (
-                'Confirm Loan'
+                <Text>Confirm Loan</Text>
               ) : (
-                'Confirm Consumption'
+                <Text>Confirm Consumption</Text>
               )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </View>
   );
 }

@@ -1,6 +1,5 @@
-import { Search, X } from "lucide-react";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+import { Search, X } from "lucide-react-native";
+import { TextInput, View, Pressable } from "react-native";
 import { useState } from "react";
 
 interface SearchBarProps {
@@ -16,39 +15,39 @@ export default function SearchBar({
 }: SearchBarProps) {
   const [query, setQuery] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const handleChange = (value: string) => {
     setQuery(value);
     onSearch?.(value);
   };
 
   const handleClear = () => {
     setQuery("");
+    onSearch?.(""); // Notify parent that search is cleared
     onClear?.();
   };
 
   return (
-    <div className="relative">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-      <Input
-        type="search"
+    <View className="relative justify-center">
+      <View className="absolute left-3 z-10">
+        <Search className="w-5 h-5 text-muted-foreground" />
+      </View>
+      <TextInput
         placeholder={placeholder}
         value={query}
-        onChange={handleChange}
-        className="pl-10 pr-10"
+        onChangeText={handleChange}
+        className="pl-10 pr-10 h-12 bg-input rounded-lg border border-border text-foreground"
+        placeholderTextColor="#a1a1aa"
         data-testid="input-search"
       />
-      {query && (
-        <Button
-          size="icon"
-          variant="ghost"
-          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-          onClick={handleClear}
+      {query ? (
+        <Pressable
+          className="absolute right-1 h-full w-10 flex items-center justify-center"
+          onPress={handleClear}
           data-testid="button-clear-search"
         >
-          <X className="w-4 h-4" />
-        </Button>
-      )}
-    </div>
+          <X className="w-4 h-4 text-muted-foreground" />
+        </Pressable>
+      ) : null}
+    </View>
   );
 }

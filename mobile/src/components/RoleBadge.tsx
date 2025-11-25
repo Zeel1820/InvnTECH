@@ -1,5 +1,6 @@
 import { Badge } from "./ui/badge";
-import { Shield, UserCog, User } from "lucide-react";
+import { Shield, UserCog, User } from "lucide-react-native";
+import { Text } from 'react-native';
 
 interface RoleBadgeProps {
   role: "admin" | "manager" | "staff";
@@ -28,9 +29,9 @@ export default function RoleBadge({ role }: RoleBadgeProps) {
   const Icon = config.icon;
 
   return (
-    <Badge className={`gap-1 ${config.className}`} data-testid={`badge-role-${role}`}>
+    <Badge className={`flex-row items-center gap-1 ${config.className}`} data-testid={`badge-role-${role}`}>
       <Icon className="w-3 h-3" />
-      {config.label}
+      <Text>{config.label}</Text>
     </Badge>
   );
 }

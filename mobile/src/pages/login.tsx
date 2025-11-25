@@ -2,22 +2,23 @@
 
 import { useToast } from '../hooks/use-toast';
 import { useState } from 'react';
+import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
+import { useNavigate } from 'react-router-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Eye, EyeOff } from 'lucide-react-native';
 
 export default function Login() {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
 
-  // Email validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-
-    // Clear UI errors
+  const handleSubmit = async () => {
     if (!emailRegex.test(email)) {
       toast({
         variant: 'destructive',
@@ -27,138 +28,151 @@ export default function Login() {
       return;
     }
 
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
+      if (!res.ok) {
+        toast({
+          variant: 'destructive',
+          title: 'Login Failed',
+          description: data.message || 'Invalid email or password.',
+        });
+        return;
+      }
+
+      toast({
+        title: 'Login Successful',
+        description: 'Redirecting to dashboard...',
+      });
+
+      if (remember) {
+        await AsyncStorage.setItem('token', data.token);
+      }
+
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1200);
+    } catch (error) {
       toast({
         variant: 'destructive',
-        title: 'Login Failed',
-        description: data.message || 'Invalid email or password.',
+        title: 'Error',
+        description: 'An unexpected error occurred.',
       });
-      return;
     }
-
-    // Success toast
-    toast({
-      title: 'Login Successful',
-      description: 'Redirecting to dashboard...',
-    });
-
-    if (remember) {
-      localStorage.setItem('token', data.token);
-    }
-
-    setTimeout(() => {
-      window.location.href = '/dashboard';
-    }, 1200);
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center w-full dark:bg-gray-950 bg-background px-3">
-      <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg px-8 py-6 max-w-md w-full">
-        {/* Heading */}
-        <h1 className="text-2xl font-bold text-center mb-2 dark:text-gray-200">Welcome Back!</h1>
-        <p className="text-center text-gray-600 dark:text-gray-400 mb-4">Login to continue</p>
+    <View style={styles.container}>
+      <View style={styles.card}>
+        <Text style={styles.title}>Welcome Back!</Text>
+        <Text style={styles.subtitle}>Login to continue</Text>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email */}
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >
-              Email Address
-            </label>
-            <input
-              type="email"
-              id="email"
-              required
+        <View style={styles.form}>
+          <View>
+            <Text style={styles.label}>Email Address</Text>
+            <TextInput
+              style={styles.input}
+              keyboardType="email-address"
+              autoCapitalize="none"
               placeholder="you@example.com"
-              className="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300 
-                         focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-gray-200"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChangeText={setEmail}
             />
-          </div>
+          </View>
 
-          {/* Password */}
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >
-              Password
-            </label>
-
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                id="password"
-                required
+          <View>
+            <Text style={styles.label}>Password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                secureTextEntry={!showPassword}
                 placeholder="Enter your password"
-                className="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300
-                           focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 
-                           dark:bg-gray-800 dark:text-gray-200 pr-10"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChangeText={setPassword}
               />
-
-              {/* Show/Hide Password */}
-              <span
-                className="absolute right-3 top-2.5 cursor-pointer text-gray-600 dark:text-gray-300"
-                onClick={() => setShowPassword(!showPassword)}
-              >
+              <Pressable style={styles.eyeIcon} onPress={() => setShowPassword(!showPassword)}>
                 {showPassword ? (
-                  <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 6c3.79 0 7.17 2.13 8.82 5.5C19.17 14.87 15.79 17 12 17c-3.79 0-7.17-2.13-8.82-5.5C4.83 8.13 8.21 6 12 6m0-2C7 4 2.73 7.11 1 11.5C2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4m0 5a2.5 2.5 0 0 0 0 5a2.5 2.5 0 0 0 0-5Z" />
-                  </svg>
+                  <EyeOff color="#6b7280" size={22} />
                 ) : (
-                  <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 7a5 5 0 0 1 5 5a5 5 0 0 1-5 5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0-3C7 4 2.73 7.11 1 11.5C2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4Z" />
-                  </svg>
+                  <Eye color="#6b7280" size={22} />
                 )}
-              </span>
-            </div>
-          </div>
+              </Pressable>
+            </View>
+          </View>
 
-          {/* Remember Me + Signup Link */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="remember"
-                checked={remember}
-                onChange={() => setRemember(!remember)}
-                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-              />
-              <label htmlFor="remember" className="ml-2 block text-sm dark:text-gray-300">
-                Remember me
-              </label>
-            </div>
+          <View style={styles.extraOptionsContainer}>
+            <Pressable style={styles.rememberMeContainer} onPress={() => setRemember(!remember)}>
+              <View style={[styles.checkbox, remember && styles.checkboxChecked]} />
+              <Text style={styles.rememberMeText}>Remember me</Text>
+            </Pressable>
+            <Pressable onPress={() => navigate('/signup')}>
+              <Text style={styles.link}>Create Account</Text>
+            </Pressable>
+          </View>
 
-            <a href="/signup" className="text-xs text-indigo-500 hover:text-indigo-700 underline">
-              Create Account
-            </a>
-          </div>
-
-          {/* Login Button */}
-          <button
-            type="submit"
-            className="w-full flex justify-center py-2 px-4 rounded-md shadow-sm text-sm font-medium 
-                       text-white bg-indigo-600 hover:bg-indigo-700 
-                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Login
-          </button>
-        </form>
-      </div>
-    </div>
+          <Pressable style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Login</Text>
+          </Pressable>
+        </View>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#f9fafb', padding: 12 },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
+    width: '100%',
+    maxWidth: 400,
+  },
+  title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 },
+  subtitle: { color: '#6b7280', textAlign: 'center', marginBottom: 16 },
+  form: { gap: 16 },
+  label: { fontSize: 14, fontWeight: '500', color: '#374151', marginBottom: 8 },
+  input: {
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    fontSize: 16,
+  },
+  passwordContainer: { flexDirection: 'row' },
+  passwordInput: {
+    flex: 1,
+    borderRightWidth: 0,
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  eyeIcon: {
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderLeftWidth: 0,
+    borderTopRightRadius: 6,
+    borderBottomRightRadius: 6,
+  },
+  extraOptionsContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  rememberMeContainer: { flexDirection: 'row', alignItems: 'center' },
+  checkbox: { width: 16, height: 16, borderWidth: 1, borderColor: '#d1d5db', borderRadius: 3 },
+  checkboxChecked: { backgroundColor: '#4f46e5', borderColor: '#4f46e5' },
+  rememberMeText: { marginLeft: 8, color: '#374151' },
+  link: { fontSize: 13, color: '#4f46e5', textDecorationLine: 'underline' },
+  button: { backgroundColor: '#4f46e5', padding: 12, borderRadius: 6, alignItems: 'center' },
+  buttonText: { color: 'white', fontSize: 16, fontWeight: '600' },
+});

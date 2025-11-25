@@ -3,7 +3,27 @@
   "version": "1.0.0",
   "main": "App.tsx",
   "private": true,
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
   "dependencies": {
-    "react-native-svg": "^15.15.0"
+    "expo": "~51.0.21",
+    "expo-status-bar": "~1.12.1",
+    "react": "18.3.1",
+    "react-native": "0.74.3",
+    "react-native-svg": "15.3.0",
+    "lucide-react-native": "0.400.0",
+    "react-native-gesture-handler": "~2.17.1",
+    "react-native-reanimated": "~3.14.0",
+    "react-native-screens": "~3.32.0",
+    "react-router-native": "^6.25.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@types/react": "~18.2.79",
+    "typescript": "~5.3.3"
   }
 }

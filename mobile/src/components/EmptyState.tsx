@@ -1,5 +1,6 @@
-import { LucideIcon, Package } from "lucide-react";
+import { LucideIcon, Package } from "lucide-react-native";
 import { Button } from "./ui/button";
+import { View, Text } from 'react-native';
 
 interface EmptyStateProps {
   icon?: LucideIcon;
@@ -17,24 +18,24 @@ export default function EmptyState({
   onAction,
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-      <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+    <View className="flex-1 items-center justify-center py-12 px-4 text-center">
+      <View className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
         <Icon className="w-8 h-8 text-muted-foreground" />
-      </div>
+      </View>
       
-      <h3 className="text-lg font-medium mb-2" data-testid="text-empty-title">{title}</h3>
+      <Text className="text-lg font-medium mb-2" data-testid="text-empty-title">{title}</Text>
       
       {description && (
-        <p className="text-sm text-muted-foreground max-w-sm mb-6" data-testid="text-empty-description">
+        <Text className="text-sm text-muted-foreground max-w-sm mb-6 text-center" data-testid="text-empty-description">
           {description}
-        </p>
+        </Text>
       )}
       
       {actionLabel && onAction && (
-        <Button onClick={onAction} data-testid="button-empty-action">
-          {actionLabel}
+        <Button onPress={onAction} data-testid="button-empty-action">
+          <Text>{actionLabel}</Text>
         </Button>
       )}
-    </div>
+    </View>
   );
 }

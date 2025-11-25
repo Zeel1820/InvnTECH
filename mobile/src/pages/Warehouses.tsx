@@ -34,9 +34,10 @@ import { useToast } from '../hooks/use-toast';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { insertWarehouseSchema, type Warehouse } from '../../../shared/schema';
-import { Plus, MapPin, Edit, Trash2, AlertCircle } from 'lucide-react';
+import { Plus, MapPin, Edit, Trash2, AlertCircle } from 'lucide-react-native';
 import { useAuth } from '../hooks/useAuth';
 import type { z } from 'zod';
+import { View, Text, ScrollView } from 'react-native';
 
 type WarehouseFormData = z.infer<typeof insertWarehouseSchema>;
 
@@ -162,44 +163,44 @@ export default function Warehouses() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-muted-foreground">Loading warehouses...</div>
-      </div>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <Text>Loading warehouses...</Text>
+      </View>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <Card className="max-w-md">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <AlertCircle className="w-12 h-12 text-destructive mb-4" />
-            <p className="text-destructive text-center font-medium mb-2">
+            <Text className="text-destructive text-center font-medium mb-2">
               Failed to load warehouses
-            </p>
-            <p className="text-sm text-muted-foreground text-center">{(error as Error).message}</p>
+            </Text>
+            <Text className="text-sm text-muted-foreground text-center">{(error as Error).message}</Text>
           </CardContent>
         </Card>
-      </div>
+      </View>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-screen-xl mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-medium">Warehouses</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+    <ScrollView className="min-h-screen bg-background">
+      <View className="px-4 py-6">
+        <View className="flex justify-between items-center mb-6">
+          <View>
+            <Text className="text-2xl font-medium">Warehouses</Text>
+            <Text className="text-sm text-muted-foreground mt-1">
               Manage warehouse locations and assignments
-            </p>
-          </div>
+            </Text>
+          </View>
           {isAdmin && (
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <Button onClick={handleAddNew} data-testid="button-add-warehouse">
+                <Button onPress={handleAddNew} data-testid="button-add-warehouse">
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Warehouse
+                  <Text>Add Warehouse</Text>
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -209,7 +210,7 @@ export default function Warehouses() {
                   </DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                  <View onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                     <FormField
                       control={form.control}
                       name="name"
@@ -245,37 +246,39 @@ export default function Warehouses() {
                         </FormItem>
                       )}
                     />
-                    <div className="flex justify-end gap-2 pt-4">
+                    <View className="flex justify-end gap-2 pt-4">
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => {
+                        onPress={() => {
                           setDialogOpen(false);
                           setEditingWarehouse(null);
                           form.reset();
                         }}
                         data-testid="button-cancel"
                       >
-                        Cancel
+                        <Text>Cancel</Text>
                       </Button>
                       <Button
-                        type="submit"
+                        onPress={form.handleSubmit(handleSubmit)}
                         disabled={createMutation.isPending || updateMutation.isPending}
                         data-testid="button-submit-warehouse"
                       >
-                        {createMutation.isPending || updateMutation.isPending
-                          ? 'Saving...'
-                          : editingWarehouse
-                          ? 'Update'
-                          : 'Create'}
+                        <Text>
+                          {createMutation.isPending || updateMutation.isPending
+                            ? 'Saving...'
+                            : editingWarehouse
+                            ? 'Update'
+                            : 'Create'}
+                        </Text>
                       </Button>
-                    </div>
-                  </form>
+                    </View>
+                  </View>
                 </Form>
               </DialogContent>
             </Dialog>
           )}
-        </div>
+        </View>
 
         <AlertDialog open={!!deleteWarehouse} onOpenChange={() => setDeleteWarehouse(null)}>
           <AlertDialogContent>
@@ -287,13 +290,13 @@ export default function Warehouses() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel data-testid="button-cancel-delete">Cancel</AlertDialogCancel>
+              <AlertDialogCancel data-testid="button-cancel-delete"><Text>Cancel</Text></AlertDialogCancel>
               <AlertDialogAction
-                onClick={() => deleteWarehouse && deleteMutation.mutate(deleteWarehouse.id)}
+                onPress={() => deleteWarehouse && deleteMutation.mutate(deleteWarehouse.id)}
                 disabled={deleteMutation.isPending}
                 data-testid="button-confirm-delete"
               >
-                {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+                <Text>{deleteMutation.isPending ? 'Deleting...' : 'Delete'}</Text>
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -303,13 +306,13 @@ export default function Warehouses() {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <MapPin className="w-12 h-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground text-center">
+              <Text className="text-muted-foreground text-center">
                 No warehouses found. Add your first warehouse to get started.
-              </p>
+              </Text>
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <View className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {warehouses?.map((warehouse) => (
               <Card key={warehouse.id} data-testid={`card-warehouse-${warehouse.id}`}>
                 <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
@@ -320,11 +323,11 @@ export default function Warehouses() {
                     {warehouse.name}
                   </CardTitle>
                   {isAdmin && (
-                    <div className="flex gap-1">
+                    <View className="flex gap-1">
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleEdit(warehouse)}
+                        onPress={() => handleEdit(warehouse)}
                         data-testid={`button-edit-warehouse-${warehouse.id}`}
                       >
                         <Edit className="w-4 h-4" />
@@ -332,32 +335,32 @@ export default function Warehouses() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => setDeleteWarehouse(warehouse)}
+                        onPress={() => setDeleteWarehouse(warehouse)}
                         data-testid={`button-delete-warehouse-${warehouse.id}`}
                       >
                         <Trash2 className="w-4 h-4 text-destructive" />
                       </Button>
-                    </div>
+                    </View>
                   )}
                 </CardHeader>
                 <CardContent>
                   {warehouse.location && (
-                    <div className="flex items-start gap-2 mb-2">
+                    <View className="flex items-start gap-2 mb-2">
                       <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
-                      <p
+                      <Text
                         className="text-sm text-muted-foreground"
                         data-testid={`text-warehouse-location-${warehouse.id}`}
                       >
                         {warehouse.location}
-                      </p>
-                    </div>
+                      </Text>
+                    </View>
                   )}
                 </CardContent>
               </Card>
             ))}
-          </div>
+          </View>
         )}
-      </div>
-    </div>
+      </View>
+    </ScrollView>
   );
 }

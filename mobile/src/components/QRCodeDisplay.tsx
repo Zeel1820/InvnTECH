@@ -1,6 +1,7 @@
-import { QRCodeSVG } from "qrcode.react";
+import QRCode from 'react-native-qrcode-svg';
 import { Button } from "./ui/button";
-import { Download, Share2 } from "lucide-react";
+import { Download, Share2 } from "lucide-react-native";
+import { View, Text, Share } from 'react-native';
 
 interface QRCodeDisplayProps {
   value: string;
@@ -18,50 +19,57 @@ export default function QRCodeDisplay({
   showActions = true,
 }: QRCodeDisplayProps) {
   const handleDownload = () => {
+    // TODO: Implement native download functionality
     console.log('Download QR code:', value);
   };
 
-  const handleShare = () => {
-    console.log('Share QR code:', value);
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `QR Code for ${title}: ${value}`,
+      });
+    } catch (error) {
+      console.error('Error sharing QR code', error);
+    }
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 p-6 bg-card border border-card-border rounded-lg">
-      <div className="p-4 bg-white rounded-lg">
-        <QRCodeSVG value={value} size={size} level="H" data-testid="qr-code-svg" />
-      </div>
+    <View className="flex flex-col items-center gap-4 p-6 bg-card border border-card-border rounded-lg">
+      <View className="p-4 bg-white rounded-lg">
+        <QRCode value={value} size={size} data-testid="qr-code-svg" />
+      </View>
       
       {title && (
-        <div className="text-center">
-          <h3 className="font-medium text-base" data-testid="text-qr-title">{title}</h3>
+        <View className="text-center">
+          <Text className="font-medium text-base" data-testid="text-qr-title">{title}</Text>
           {subtitle && (
-            <p className="text-sm text-muted-foreground mt-1" data-testid="text-qr-subtitle">{subtitle}</p>
+            <Text className="text-sm text-muted-foreground mt-1" data-testid="text-qr-subtitle">{subtitle}</Text>
           )}
-        </div>
+        </View>
       )}
       
       {showActions && (
-        <div className="flex gap-2 w-full">
+        <View className="flex flex-row gap-2 w-full">
           <Button
             variant="outline"
             className="flex-1"
-            onClick={handleDownload}
+            onPress={handleDownload}
             data-testid="button-download-qr"
           >
             <Download className="w-4 h-4 mr-2" />
-            Download
+            <Text>Download</Text>
           </Button>
           <Button
             variant="outline"
             className="flex-1"
-            onClick={handleShare}
+            onPress={handleShare}
             data-testid="button-share-qr"
           >
             <Share2 className="w-4 h-4 mr-2" />
-            Share
+            <Text>Share</Text>
           </Button>
-        </div>
+        </View>
       )}
-    </div>
+    </View>
   );
 }

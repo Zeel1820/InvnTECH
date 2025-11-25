@@ -1,5 +1,6 @@
 import { Badge } from "./ui/badge";
-import { X } from "lucide-react";
+import { X } from "lucide-react-native";
+import { View, Pressable, Text } from 'react-native';
 
 interface FilterChip {
   id: string;
@@ -16,26 +17,26 @@ export default function FilterChips({ filters, onRemove }: FilterChipsProps) {
   if (filters.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <View className="flex flex-row flex-wrap gap-2">
       {filters.map((filter) => (
         <Badge
           key={filter.id}
           variant="secondary"
-          className="gap-1 pl-3 pr-2 py-1.5 hover-elevate"
+          className="flex-row items-center gap-1 pl-3 pr-2 py-1.5"
           data-testid={`badge-filter-${filter.id}`}
         >
-          <span className="text-xs">{filter.label}: {filter.value}</span>
+          <Text className="text-xs">{filter.label}: {filter.value}</Text>
           {onRemove && (
-            <button
-              onClick={() => onRemove(filter.id)}
-              className="ml-1 hover-elevate rounded-full"
+            <Pressable
+              onPress={() => onRemove(filter.id)}
+              className="ml-1 rounded-full p-1"
               data-testid={`button-remove-filter-${filter.id}`}
             >
               <X className="w-3 h-3" />
-            </button>
+            </Pressable>
           )}
         </Badge>
       ))}
-    </div>
+    </View>
   );
 }

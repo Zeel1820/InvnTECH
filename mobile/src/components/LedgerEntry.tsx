@@ -1,5 +1,6 @@
 import { Badge } from "./ui/badge";
-import { ArrowDownCircle, ArrowUpCircle, RefreshCw, ArrowRightLeft } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, RefreshCw, ArrowRightLeft } from "lucide-react-native";
+import { View, Text } from 'react-native';
 
 interface LedgerEntryProps {
   id: string;
@@ -49,35 +50,35 @@ export default function LedgerEntry({
   const Icon = config.icon;
 
   return (
-    <div className="relative pl-8 pb-4 border-l-2 border-border last:border-l-0" data-testid={`entry-ledger-${id}`}>
-      <div className={`absolute left-0 -translate-x-1/2 top-0 w-6 h-6 rounded-full bg-background border-2 flex items-center justify-center ${config.className}`}>
+    <View className="relative pl-8 pb-4 border-l-2 border-border last:border-l-0" data-testid={`entry-ledger-${id}`}>
+      <View className={`absolute left-0 -translate-x-1/2 top-0 w-6 h-6 rounded-full bg-background border-2 flex items-center justify-center ${config.className}`}>
         <Icon className="w-3.5 h-3.5" />
-      </div>
+      </View>
       
-      <div className="bg-card border border-card-border rounded-lg p-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
+      <View className="bg-card border border-card-border rounded-lg p-3">
+        <View className="flex-row items-start justify-between gap-2">
+          <View className="flex-1 min-w-0">
+            <View className="flex-row items-center gap-2 flex-wrap">
               <Badge variant="secondary" className="text-xs" data-testid={`badge-type-${id}`}>
                 {config.label}
               </Badge>
-              <span className="font-mono font-medium" data-testid={`text-quantity-${id}`}>
+              <Text className="font-mono font-medium" data-testid={`text-quantity-${id}`}>
                 {type === "out" || type === "adjust" && quantity < 0 ? "" : "+"}{quantity}
-              </span>
-            </div>
+              </Text>
+            </View>
             
-            <p className="text-sm text-muted-foreground mt-1">{timestamp}</p>
-            <p className="text-sm mt-1">By: {user}</p>
-            {warehouse && <p className="text-sm text-muted-foreground">{warehouse}</p>}
-            {reason && <p className="text-sm mt-1 italic">Reason: {reason}</p>}
+            <Text className="text-sm text-muted-foreground mt-1">{timestamp}</Text>
+            <Text className="text-sm mt-1">By: {user}</Text>
+            {warehouse && <Text className="text-sm text-muted-foreground">{warehouse}</Text>}
+            {reason && <Text className="text-sm mt-1 italic">Reason: {reason}</Text>}
             {reference && (
-              <p className="text-xs font-mono text-muted-foreground mt-1">
+              <Text className="text-xs font-mono text-muted-foreground mt-1">
                 Ref: {reference}
-              </p>
+              </Text>
             )}
-          </div>
-        </div>
-      </div>
-    </div>
+          </View>
+        </View>
+      </View>
+    </View>
   );
 }
