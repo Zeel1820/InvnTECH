@@ -1,8 +1,8 @@
-'use client';
 
 import { Home, Package, BarChart3, QrCode } from 'lucide-react-native';
-import { Link, useLocation } from 'wouter';
+import { Link, useLocation } from 'react-router-native';
 import { cn } from '../lib/utils';
+import { Text, View } from 'react-native';
 
 interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
@@ -18,39 +18,41 @@ const navItems: NavItem[] = [
 ];
 
 export default function BottomNav() {
-  const [location] = useLocation();
+  const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t">
-      <div className="flex justify-around h-16">
+    <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 50, backgroundColor: 'white', borderTopWidth: 1, borderTopColor: '#e5e5e5' }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-around', height: 64 }}>
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = location === item.path;
+          const isActive = location.pathname === item.path;
 
           return (
             <Link
               key={item.path}
-              href={item.path}
-              className="flex-1 flex flex-col items-center justify-center gap-1 text-xs font-medium transition-colors"
+              to={item.path}
+              style={{ flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, }}
             >
+              <>
               <Icon
                 className={cn(
                   'w-6 h-6',
                   isActive ? 'text-primary' : 'text-muted-foreground'
                 )}
               />
-              <span
+              <Text
                 className={cn(
                   'mt-1',
                   isActive ? 'text-primary' : 'text-muted-foreground'
                 )}
               >
                 {item.label}
-              </span>
+              </Text>
+              </>
             </Link>
           );
         })}
-      </div>
-    </nav>
+      </View>
+    </View>
   );
 }

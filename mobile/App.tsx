@@ -1,3 +1,5 @@
+
+import { registerRootComponent } from 'expo';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { NativeRouter, Route, Routes } from 'react-router-native';
@@ -31,3 +33,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
+
+registerRootComponent(App);
