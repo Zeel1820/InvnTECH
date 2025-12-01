@@ -358,23 +358,39 @@ export default function Scanner() {
             <View className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
               {scanMode === 'camera' ? (
                 <>
-                  <Text><li>Click "Start Scan" to activate the camera</li></Text>
-                  <Text><li>Point camera at QR code and hold steady</li></Text>
-                  <Text><li>Scanner will automatically detect and lookup the item</li></Text>
-                  <Text><li>Upload an image if you have a QR code screenshot</li></Text>
+                  <Text>
+                    <li>Click "Start Scan" to activate the camera</li>
+                  </Text>
+                  <Text>
+                    <li>Point camera at QR code and hold steady</li>
+                  </Text>
+                  <Text>
+                    <li>Scanner will automatically detect and lookup the item</li>
+                  </Text>
+                  <Text>
+                    <li>Upload an image if you have a QR code screenshot</li>
+                  </Text>
                 </>
               ) : (
                 <>
-                  <Text><li>Enter the exact SKU or serial number</li></Text>
-                  <Text><li>Serial numbers are usually formatted like: SKU-0001</li></Text>
-                  <Text><li>Press Enter or click "Look Up" to search</li></Text>
-                  <Text><li>Results will appear automatically if found</li></Text>
+                  <Text>
+                    <li>Enter the exact SKU or serial number</li>
+                  </Text>
+                  <Text>
+                    <li>Serial numbers are usually formatted like: SKU-0001</li>
+                  </Text>
+                  <Text>
+                    <li>Press Enter or click "Look Up" to search</li>
+                  </Text>
+                  <Text>
+                    <li>Results will appear automatically if found</li>
+                  </Text>
                 </>
               )}
             </View>
           </CardContent>
         </Card>
-      </main>
+      </View>
 
       <BottomNav />
 
