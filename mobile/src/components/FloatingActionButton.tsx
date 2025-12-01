@@ -1,27 +1,34 @@
-import { Button } from "./ui/button";
-import { LucideIcon, Plus } from "lucide-react-native";
-import { Text } from 'react-native';
+'use client';
+
+import { Button } from './ui/button';
+import { LucideIcon, Plus } from 'lucide-react';
+import { cn } from '../lib/utils';
 
 interface FloatingActionButtonProps {
   icon?: LucideIcon;
-  onPress?: () => void;
+  onClick?: () => void;
   label?: string;
+  className?: string;
 }
 
 export default function FloatingActionButton({
   icon: Icon = Plus,
-  onPress,
-  label = "Add",
+  onClick,
+  label = 'Add',
+  className,
 }: FloatingActionButtonProps) {
   return (
     <Button
-      size="default"
-      className="absolute bottom-20 right-4 z-40 h-14 rounded-full shadow-lg px-6 flex-row items-center"
-      onPress={onPress}
+      size="lg"
+      className={cn(
+        'fixed bottom-20 right-4 z-40 h-14 rounded-full shadow-lg px-5 flex items-center',
+        className
+      )}
+      onClick={onClick}
       data-testid="button-fab"
     >
-      <Icon className="w-5 h-5 mr-2" />
-      <Text>{label}</Text>
+      <Icon className="w-6 h-6 mr-2" />
+      {label}
     </Button>
   );
 }

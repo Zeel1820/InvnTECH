@@ -1,8 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
-import { useNavigate } from 'react-router-native';
 
 export default function Signup() {
   const [fullName, setFullName] = useState('');
@@ -13,7 +11,6 @@ export default function Signup() {
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const navigate = useNavigate();
 
   // Email validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -21,7 +18,8 @@ export default function Signup() {
   // Password validation: 1 uppercase, 1 number, min 8 chars
   const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-  async function handleSubmit() {
+  async function handleSubmit(e: any) {
+    e.preventDefault();
     setError('');
     setSuccess('');
 
@@ -42,7 +40,7 @@ export default function Signup() {
     const lastName = rest.join(' ');
 
     try {
-      const res = await fetch('http://localhost:3000/api/auth/signup', {
+      const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ firstName, lastName, email, password, role }),
@@ -56,181 +54,182 @@ export default function Signup() {
       }
 
       setSuccess('Account created successfully! Redirecting...');
-      setTimeout(() => navigate('/login'), 1500);
+      setTimeout(() => (window.location.href = '/login'), 1500);
     } catch (e) {
       setError('Something went wrong');
     }
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
+    <div className="min-h-screen flex items-center justify-center w-full dark:bg-gray-950 bg-background">
+      <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg px-8 py-6 max-w-md w-full">
         {/* Heading */}
-        <Text style={styles.title}>Create a new account</Text>
-        <Text style={styles.subtitle}>Enter your details to register.</Text>
+        <h1 className="text-2xl font-bold text-center mb-2 dark:text-gray-200">
+          Create a new account
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400 text-center mb-4">
+          Enter your details to register.
+        </p>
 
         {/* Error / Success */}
-        {error && <Text style={styles.errorText}>{error}</Text>}
-        {success && <Text style={styles.successText}>{success}</Text>}
+        {error && <p className="text-red-500 text-center text-sm mb-2">{error}</p>}
+        {success && <p className="text-green-500 text-center text-sm mb-2">{success}</p>}
 
-        <View style={styles.form}>
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Full Name */}
-          <View>
-            <Text style={styles.label}>Full Name *</Text>
-            <TextInput
-              style={styles.input}
+          <div>
+            <label
+              htmlFor="fullName"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Full Name *
+            </label>
+
+            <input
+              id="fullName"
+              type="text"
+              required
               placeholder="James Brown"
+              className="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300
+                         focus:ring-indigo-500 focus:border-indigo-500 
+                         dark:bg-gray-800 dark:text-gray-200"
               value={fullName}
-              onChangeText={setFullName}
-              autoCapitalize="words"
+              onChange={(e) => setFullName(e.target.value)}
             />
-          </View>
+          </div>
 
           {/* Email */}
-          <View>
-            <Text style={styles.label}>Email Address *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="hello@company.com"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            {email && !emailRegex.test(email) && (
-              <Text style={styles.errorTextSmall}>Invalid email format.</Text>
-            )}
-          </View>
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Email Address *
+            </label>
 
-          {/* Role Select - Simplified for mobile */}
-          <View>
-            <Text style={styles.label}>Select Role *</Text>
-            {/* Replace with a proper picker component in a real app */}
-            <View style={styles.roleContainer}>
-              {['admin', 'manager', 'staff'].map((r) => (
-                <Pressable
-                  key={r}
-                  style={[styles.roleButton, role === r && styles.roleButtonSelected]}
-                  onPress={() => setRole(r)}
-                >
-                  <Text
-                    style={[styles.roleButtonText, role === r && styles.roleButtonTextSelected]}
-                  >
-                    {r.charAt(0).toUpperCase() + r.slice(1)}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
+            <input
+              id="email"
+              type="email"
+              required
+              placeholder="hello@company.com"
+              className="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300 
+                         focus:ring-indigo-500 focus:border-indigo-500 
+                         dark:bg-gray-800 dark:text-gray-200"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+
+            {email && !emailRegex.test(email) && (
+              <p className="text-red-500 text-xs mt-1">Invalid email format.</p>
+            )}
+          </div>
+
+          {/* Role Select */}
+          <div>
+            <label
+              htmlFor="role"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Select Role *
+            </label>
+
+            <select
+              id="role"
+              className="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300
+                         dark:bg-gray-800 dark:text-gray-200 
+                         focus:ring-indigo-500 focus:border-indigo-500"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+            >
+              <option value="admin">Admin</option>
+              <option value="manager">Manager</option>
+              <option value="staff">Staff</option>
+            </select>
+          </div>
 
           {/* Password */}
-          <View>
-            <Text style={styles.label}>Password *</Text>
-            <View style={styles.passwordInputContainer}>
-              <TextInput
-                style={styles.passwordInput}
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Password *
+            </label>
+
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                required
                 placeholder="••••••••"
-                secureTextEntry={!showPassword}
+                className="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300
+                           focus:ring-indigo-500 focus:border-indigo-500 
+                           dark:bg-gray-800 dark:text-gray-200 pr-10"
                 value={password}
-                onChangeText={setPassword}
+                onChange={(e) => setPassword(e.target.value)}
               />
-              <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                {/* Replace with an actual icon */}
-                <Text>{showPassword ? 'Hide' : 'Show'}</Text>
-              </Pressable>
-            </View>
+
+              {/* Show/Hide Icon */}
+              <span
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-2.5 cursor-pointer text-gray-600 dark:text-gray-300"
+              >
+                {showPassword ? (
+                  /* Hide Icon */
+                  <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 6c3.79 0 7.17 2.13 8.82 5.5C19.17 14.87 15.79 17 12 17c-3.79 0-7.17-2.13-8.82-5.5C4.83 8.13 8.21 6 12 6m0-2C7 4 2.73 7.11 1 11.5C2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4m0 5a2.5 2.5 0 0 0 0 5a2.5 2.5 0 0 0 0-5Z" />
+                  </svg>
+                ) : (
+                  /* Show Icon */
+                  <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 7a5 5 0 0 1 5 5a5 5 0 0 1-5 5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0-3C7 4 2.73 7.11 1 11.5C2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4Z" />
+                  </svg>
+                )}
+              </span>
+            </div>
+
+            {/* Password Validation */}
             {password && !passwordRegex.test(password) && (
-              <Text style={styles.errorTextSmall}>
-                Must have 1 uppercase, 1 number, min. 8 characters.
-              </Text>
+              <p className="text-red-500 text-xs mt-1">
+                Must have 1 uppercase letter, 1 number, min. 8 characters.
+              </p>
             )}
+
             {password && passwordRegex.test(password) && (
-              <Text style={styles.successTextSmall}>Strong password ✓</Text>
+              <p className="text-green-500 text-xs mt-1">Strong password ✓</p>
             )}
-          </View>
+          </div>
 
           {/* Register Button */}
-          <Pressable style={styles.button} onPress={handleSubmit}>
-            <Text style={styles.buttonText}>Register</Text>
-          </Pressable>
+          <button
+            type="submit"
+            className="w-full flex justify-center py-2 px-4 border border-transparent 
+                       rounded-md shadow-sm text-sm font-medium text-white 
+                       bg-indigo-600 hover:bg-indigo-700 
+                       focus:outline-none focus:ring-2 focus:ring-offset-2 
+                       focus:ring-indigo-500"
+          >
+            Register
+          </button>
 
           {/* Terms */}
-          <Text style={styles.termsText}>
-            By clicking Register, you agree to our <Text style={styles.link}>Terms and Conditions</Text>.
-          </Text>
-        </View>
+          <p className="text-gray-600 dark:text-gray-400 text-xs text-center mt-2">
+            By clicking Register, you agree to our{' '}
+            <a href="#" className="text-indigo-500 hover:text-indigo-700 underline">
+              Terms and Conditions
+            </a>
+            .
+          </p>
+        </form>
 
         {/* Already have account */}
-        <Text style={styles.footerText}>
+        <p className="text-center mt-4 text-sm dark:text-gray-300">
           Already have an account?{' '}
-          <Text onPress={() => navigate('/login')} style={styles.link}>
+          <a href="/login" className="text-indigo-500 hover:text-indigo-700 underline">
             Login here
-          </Text>
-        </Text>
-      </View>
-    </View>
+          </a>
+        </p>
+      </div>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#f9fafb' },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
-    width: '90%',
-    maxWidth: 400,
-  },
-  title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 },
-  subtitle: { color: '#6b7280', textAlign: 'center', marginBottom: 16 },
-  errorText: { color: '#ef4444', textAlign: 'center', fontSize: 14, marginBottom: 8 },
-  successText: { color: '#22c55e', textAlign: 'center', fontSize: 14, marginBottom: 8 },
-  form: { gap: 16 },
-  label: { fontSize: 14, fontWeight: '500', color: '#374151', marginBottom: 8 },
-  input: {
-    borderRadius: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-  },
-  passwordInputContainer: { flexDirection: 'row', alignItems: 'center' },
-  passwordInput: { flex: 1, borderRightWidth: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0 },
-  eyeIcon: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderLeftWidth: 0,
-    borderTopRightRadius: 6,
-    borderBottomRightRadius: 6,
-  },
-  errorTextSmall: { color: '#ef4444', fontSize: 12, marginTop: 4 },
-  successTextSmall: { color: '#22c55e', fontSize: 12, marginTop: 4 },
-  roleContainer: { flexDirection: 'row', justifyContent: 'space-around' },
-  roleButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-  },
-  roleButtonSelected: { backgroundColor: '#4f46e5', borderColor: '#4f46e5' },
-  roleButtonText: { color: '#374151' },
-  roleButtonTextSelected: { color: 'white' },
-  button: {
-    backgroundColor: '#4f46e5',
-    borderRadius: 6,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonText: { color: 'white', fontWeight: '500', fontSize: 16 },
-  termsText: { color: '#6b7280', fontSize: 12, textAlign: 'center', marginTop: 8 },
-  link: { color: '#4f46e5', textDecorationLine: 'underline' },
-  footerText: { textAlign: 'center', marginTop: 16, fontSize: 14 },
-});

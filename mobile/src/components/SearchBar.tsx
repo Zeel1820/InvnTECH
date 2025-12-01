@@ -1,6 +1,9 @@
-import { Search, X } from "lucide-react-native";
-import { TextInput, View, Pressable } from "react-native";
-import { useState } from "react";
+'use client';
+
+import { Search, X } from 'lucide-react';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
+import { useState } from 'react';
 
 interface SearchBarProps {
   placeholder?: string;
@@ -9,45 +12,45 @@ interface SearchBarProps {
 }
 
 export default function SearchBar({
-  placeholder = "Search inventory...",
+  placeholder = 'Search inventory...',
   onSearch,
   onClear,
 }: SearchBarProps) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
 
-  const handleChange = (value: string) => {
-    setQuery(value);
-    onSearch?.(value);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value);
+    onSearch?.(e.target.value);
   };
 
   const handleClear = () => {
-    setQuery("");
-    onSearch?.(""); // Notify parent that search is cleared
+    setQuery('');
+    onSearch?.('');
     onClear?.();
   };
 
   return (
-    <View className="relative justify-center">
-      <View className="absolute left-3 z-10">
-        <Search className="w-5 h-5 text-muted-foreground" />
-      </View>
-      <TextInput
+    <div className="relative">
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+      <Input
+        type="search"
         placeholder={placeholder}
         value={query}
-        onChangeText={handleChange}
-        className="pl-10 pr-10 h-12 bg-input rounded-lg border border-border text-foreground"
-        placeholderTextColor="#a1a1aa"
+        onChange={handleChange}
+        className="pl-10 pr-10 h-12 w-full"
         data-testid="input-search"
       />
-      {query ? (
-        <Pressable
-          className="absolute right-1 h-full w-10 flex items-center justify-center"
-          onPress={handleClear}
+      {query && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleClear}
+          className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full"
           data-testid="button-clear-search"
         >
           <X className="w-4 h-4 text-muted-foreground" />
-        </Pressable>
-      ) : null}
-    </View>
+        </Button>
+      )}
+    </div>
   );
 }
