@@ -1,4 +1,3 @@
-import { AppRegistry } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { NativeRouter, Route, Routes } from 'react-router-native';
@@ -8,7 +7,6 @@ import Inventory from './src/pages/Inventory';
 import Scan from './src/pages/Scanner';
 import Reports from './src/pages/Reports';
 import BottomNav from './src/components/BottomNav';
-import { name as appName } from './app.json';
 
 export default function App() {
   return (
@@ -33,5 +31,3 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
-
-AppRegistry.registerComponent(appName, () => App);

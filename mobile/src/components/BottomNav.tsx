@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, Package, BarChart3, QrCode } from 'lucide-react';
+import { Home, Package, BarChart3, QrCode } from 'lucide-react-native';
 import { Link, useLocation } from 'wouter';
 import { cn } from '../lib/utils';
 
